@@ -1,4 +1,4 @@
-MODULES=client store server
+MODULES=main store server
 OBJECTS=$(MODULES:=.cmo)
 OCAMLBUILD=ocamlbuild -use-ocamlfind
 MAIN=main.byte # start match/messaging
@@ -27,7 +27,6 @@ test_client:
 
 test_server:
 	$(OCAMLBUILD) -tag 'debug' 'test_server.byte' && ./'test_server.byte'
-
 
 match:
 	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
