@@ -1,4 +1,4 @@
-MODULES=main store server
+MODULES=main client 
 OBJECTS=$(MODULES:=.cmo)
 OCAMLBUILD=ocamlbuild -use-ocamlfind
 MAIN=main.byte # start match/messaging
