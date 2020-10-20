@@ -1,0 +1,8 @@
+#require "ounit2";;
+#require "Async";;
+#require "Core";;
+#require "ANSITerminal";;
+#directory "_build";;
+#load "main.cmo";;
+#load "store.cmo";;
+#load "client.cmo";;
