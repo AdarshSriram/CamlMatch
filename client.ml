@@ -5,7 +5,7 @@ exception UserNotFound of uid
 type online_user = {
   user_id : uid;
   name : string;
-  mutable preferences : string list;
+  mutable preferences : int list;
   mutable matches : online_user list;
   mutable current_chat : curr_chat option;
 }

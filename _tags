@@ -1,2 +1,2 @@
-true: package(ounit2),package(core),package(async)
+true: package(ounit2), package(ANSITerminal)
 true: thread
