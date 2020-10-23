@@ -3,7 +3,7 @@
 *)
 
 (** The type [phrase] represents the phrase that can be part of a 
-    user command. Each element of the list represents a word ofthe phrase
+    user command. Each element of the list represents a word of the phrase
     where a word is defined as a consecutive sequence of non-space
     characters. The list is in the same order as the words in the original
     player command.

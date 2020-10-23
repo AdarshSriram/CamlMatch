@@ -8,6 +8,9 @@
 (** The abstract type of values representing a question *)
 type t 
 
+(** [check_ans q ans] checks if [ans] is a valid answer to [q] *)
+val check_ans : t -> string -> int
+
 (** [add_question sur qu] adds [qu] to [sur] and returns a set-like list. *)
 val add_question : t list -> t -> t list
 

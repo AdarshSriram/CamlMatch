@@ -11,7 +11,7 @@ let rec fill_prefs user q_list new_prefs =
     end
   | h :: t -> begin
       Survey.print_question h;
-      try fill_prefs user t (int_of_string (read_line ()) :: new_prefs)
+      try fill_prefs user t (Survey.check_ans h (read_line ()) :: new_prefs)
       with
         Failure _ -> begin
           print_endline "Invalid entry";

@@ -3,6 +3,11 @@ type t = {
   answers : string list;
 }
 
+let check_ans q ans =
+  let a = int_of_string ans in
+  if a >= 0 && a < List.length q.answers then a
+  else failwith "Invalid entry"
+
 let same_q q1 q2 =
   if q1.question = q2.question &&
      let rec same_ans b y1 y2= 
@@ -11,27 +16,32 @@ let same_q q1 q2 =
        | (h :: t, a :: b) -> same_ans (h = a) t b
        | ([],_) | (_,[]) -> false
      in 
-     same_ans false q1.answers q2.answers
+     same_ans true q1.answers q2.answers
   then 0 else 1
 
 let add_question lst q =
   List.sort_uniq same_q (q :: lst)
 
 let rec rem_question q lst = 
-  match lst with
-  | [] -> []
-  | h :: t -> begin
-      if h.question = q then t
-      else h :: (rem_question q t)
-    end
-
-let post_q = {
-  question = "Do you like post-it notes?";
-  answers = ["yes";"no"]
-}
+  List.filter (fun h -> h.question = q) lst
 
 let question_list = [
-  post_q
+  {
+    question = "Do you like post-it notes?";
+    answers = ["yes";"no"]
+  };
+  {
+    question = "What is your favorite season?";
+    answers = ["fall";"spring";"winter";"summer"]
+  };
+  {
+    question = "Do you use pens or pencils?";
+    answers = ["pen";"pencil"]
+  };
+  {
+    question = "RPCC or Appel?";
+    answers = ["RPCC";"Appel"]
+  }
 ]
 
 let print_question q =

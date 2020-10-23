@@ -9,12 +9,17 @@ exception Empty
 
 exception Malformed
 
-let p el = if (String.equal el "") then false else true
+let p el = el <> ""
+
+(* [valid_rest command] checks if the phrase of [command]
+   is valid. *)
+let valid_rest command =
+  failwith "Unimplemented"
 
 let command verb rest = 
   let len = List.length rest in
-  if verb = "chat" && len > 0 then Chat rest else 
-  if verb = "view" && len > 0 then View rest else
+  if verb = "chat" && len > 0 then valid_rest (Chat rest) else 
+  if verb = "view" && len > 0 then valid_rest (View rest) else
   if verb = "quit" && len = 0 then Quit else
     raise Malformed
 
