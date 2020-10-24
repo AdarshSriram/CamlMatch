@@ -18,6 +18,7 @@ test:
 	$(OCAMLBUILD) -tag 'debug' 'test_store.byte' && ./'test_store.byte'
 	$(OCAMLBUILD) -tag 'debug' 'test_client.byte' && ./'test_client.byte'
 	$(OCAMLBUILD) -tag 'debug' 'test_server.byte' && ./'test_server.byte'
+	$(OCAMLBUILD) -tag 'debug' 'test_survey.byte' && ./'test_survey.byte'
 
 test_store:
 	$(OCAMLBUILD) -tag 'debug' 'test_store.byte' && ./'test_store.byte'
@@ -28,5 +29,11 @@ test_client:
 test_server:
 	$(OCAMLBUILD) -tag 'debug' 'test_server.byte' && ./'test_server.byte'
 
+test_survey:
+	$(OCAMLBUILD) -tag 'debug' 'test_survey.byte' && ./'test_survey.byte'
+
 match:
 	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
+
+zip: 
+	zip final_project.zip *.ml* _tags Makefile
