@@ -18,7 +18,7 @@ let get_name_test
 let get_pref_test 
     (name : string)
     (t : Client.t) 
-    (expected_output : string list) : test = 
+    (expected_output : int list) : test = 
   name >:: (fun _ -> 
       assert_equal expected_output (Client.get_preferences t))
 
@@ -64,8 +64,8 @@ let client_tests = [
   get_matches_test "User 1 has no matches" u1 [];
   get_chats_test "User 1 has no chats" u1 None;
 
-  get_pref_test "Updated U1 preferences are [coffee, fall]" 
-    (Client.update_prefs u2 ["coffee"; "fall"]; u2) ["coffee"; "fall"];
+  get_pref_test "Updated U1 preferences are [3;1]" 
+    (Client.update_prefs u2 [3; 1]; u2) [3; 1];
 
   get_matches_test "Updated U3 matches is [u2]" 
     (Client.update_matches u3 u2; u3) [u2];
