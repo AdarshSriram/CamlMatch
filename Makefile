@@ -1,4 +1,4 @@
-MODULES=main client 
+MODULES=main client state survey command
 OBJECTS=$(MODULES:=.cmo)
 OCAMLBUILD=ocamlbuild -use-ocamlfind
 MAIN=main.byte # start match/messaging
@@ -15,13 +15,13 @@ clean:
 	ocamlbuild -clean
 
 test:
-	$(OCAMLBUILD) -tag 'debug' 'test_store.byte' && ./'test_store.byte'
+	$(OCAMLBUILD) -tag 'debug' 'test_state.byte' && ./'test_state.byte'
 	$(OCAMLBUILD) -tag 'debug' 'test_client.byte' && ./'test_client.byte'
 	$(OCAMLBUILD) -tag 'debug' 'test_server.byte' && ./'test_server.byte'
 	$(OCAMLBUILD) -tag 'debug' 'test_survey.byte' && ./'test_survey.byte'
 
-test_store:
-	$(OCAMLBUILD) -tag 'debug' 'test_store.byte' && ./'test_store.byte'
+test_state:
+	$(OCAMLBUILD) -tag 'debug' 'test_state.byte' && ./'test_state.byte'
 
 test_client:
 	$(OCAMLBUILD) -tag 'debug' 'test_client.byte' && ./'test_client.byte'
