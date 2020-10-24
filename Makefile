@@ -17,7 +17,6 @@ clean:
 test:
 	$(OCAMLBUILD) -tag 'debug' 'test_state.byte' && ./'test_state.byte'
 	$(OCAMLBUILD) -tag 'debug' 'test_client.byte' && ./'test_client.byte'
-	$(OCAMLBUILD) -tag 'debug' 'test_server.byte' && ./'test_server.byte'
 	$(OCAMLBUILD) -tag 'debug' 'test_survey.byte' && ./'test_survey.byte'
 
 test_state:
@@ -25,9 +24,6 @@ test_state:
 
 test_client:
 	$(OCAMLBUILD) -tag 'debug' 'test_client.byte' && ./'test_client.byte'
-
-test_server:
-	$(OCAMLBUILD) -tag 'debug' 'test_server.byte' && ./'test_server.byte'
 
 test_survey:
 	$(OCAMLBUILD) -tag 'debug' 'test_survey.byte' && ./'test_survey.byte'
