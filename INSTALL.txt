@@ -1,0 +1,4 @@
+To run our system:
+1. Unzip
+2. Run command: [make build]
+3. Run command: [make match] to interact with the system
