@@ -32,4 +32,4 @@ match:
 	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
 
 zip: 
-	zip final_project.zip *.ml* _tags Makefile
+	zip final_project.zip *.ml* _tags INSTALL.txt Makefile
