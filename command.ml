@@ -27,7 +27,8 @@ let parse str =
   (* failwith "Unimplemented" *)
   let lst = 
     String.split_on_char ' ' str
-    |> List.filter p in
+    |> List.filter p 
+  in
   match lst with
   | h :: t -> command h t
   | [] -> raise Empty

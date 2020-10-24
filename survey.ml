@@ -12,16 +12,16 @@ let check_ans q ans =
   if a >= 0 && a < List.length q.answers then a
   else failwith "Invalid entry"
 
+let  rec same_ans b y1 y2 = 
+  match (y1, y2) with
+  | ([],[]) -> b
+  | (h :: t, a :: b) -> same_ans (h = a) t b
+  | ([],_) | (_,[]) -> false
+
 let same_q q1 q2 =
-  if q1.question = q2.question &&
-     let rec same_ans b y1 y2= 
-       match (y1, y2) with
-       | ([],[]) -> b
-       | (h :: t, a :: b) -> same_ans (h = a) t b
-       | ([],_) | (_,[]) -> false
-     in 
-     same_ans true q1.answers q2.answers
-  then 0 else -1 (* -1 is returned to preserve list order *)
+  if q1.question = q2.question && same_ans true q1.answers q2.answers
+  then 0 
+  else -1 (* -1 is returned to preserve list order *)
 
 let add_question lst q =
   List.sort_uniq same_q (q :: lst)

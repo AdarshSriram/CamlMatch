@@ -35,10 +35,6 @@ val add_user: state -> int -> Client.t -> state
 (* [add_chat st id1 id2 chat] adds a new chat to  st.chat_list *)
 val add_chat: state -> int -> int -> int -> state
 
-(* [remove_user st uid] removes [uid] from st.user_list chat_list.
-   -raises UserNotFound [uid] if no such user exists.
-   val remove_user: state -> int -> state*)
-
 (* [get_user_by_id st user_id] is a tuple of corresponding (user_id*CLient.User)
 *)
 val get_user_by_id: state -> int -> Client.t
