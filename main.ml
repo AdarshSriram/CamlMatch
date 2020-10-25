@@ -26,28 +26,32 @@ let rec fill_prefs user q_list new_prefs =
     end
 
 (** [sign_up st] collects profile input to create a new user profile *)
-let sign_up st =
+let rec sign_up st =
   print_endline "Please enter your name to begin the questionaire.";
   print_string  "> ";
-  let name =
-    match read_line () with
-    | exception _ -> failwith "TODO"
-    | nm -> nm
-  in
-  let user = Client.make_user name (List.length (State.get_users st)) in 
-  fill_prefs user Survey.question_list (Client.get_preferences user);
-  let new_user_state = State.add_user st (Client.get_uid user) user in 
-  waiting_room new_user_state
+  try let name = read_line () in
+    if String.length name < 1 then failwith "Invalid Entry" else
+      let user = Client.make_user name (List.length (State.get_users st)) in 
+      fill_prefs user Survey.question_list (Client.get_preferences user);
+      let new_user_state = State.add_user st (Client.get_uid user) user in 
+      waiting_room new_user_state
+  with
+  | _ -> print_endline "Invalid entry"; sign_up st
 
 let log_in x =
   failwith "Unimplemented"
 
-(** [execute_system name] starts a session for user [name] *)
-let execute_system input =
-  let init_state = State.init_state () in 
-  if input = 0 then sign_up init_state 
-  else if input = 1 then log_in init_state 
-  else failwith "Invalid input"
+(** [execute_system summy] starts a session for a user *)
+let rec execute_system dummy =
+  print_string  "> ";
+  try
+    let start = read_int () in
+    let init_state = State.init_state () in 
+    if start = 0 then sign_up init_state 
+    else if start = 1 then log_in init_state 
+    else failwith "Invalid entry"
+  with
+  | _ -> print_endline "Invalid entry"; execute_system ()
 
 (** [main ()] prompts for the user to create a profile or log in, 
     then starts it. *)
@@ -55,10 +59,7 @@ let main () =
   ANSITerminal.(print_string  [red] "\n\nWelcome to Name of System.\n");
   print_endline "Sign up or Log in to be matched with other 
   users with whom you can chat.\nSign Up [0] | Log In [1]";
-  print_string  "> ";
-  match read_line () with
-  | exception _ -> ()
-  | x -> execute_system (int_of_string x)
+  ignore (execute_system ()); ()
 
 (* Execute the system engine. *)
 let () = main ()

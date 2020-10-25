@@ -7,7 +7,6 @@ let survey_test
     (input: Survey.t list) 
     (expected_output : Survey.t list) : test = 
   name >:: (fun _ -> 
-      (* the [printer] tells OUnit how to convert the output to a string *)
       assert_equal expected_output input)
 
 let survey_tests = [
