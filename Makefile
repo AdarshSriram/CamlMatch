@@ -1,4 +1,4 @@
-MODULES=main client state survey command
+MODULES=main client state survey command author
 OBJECTS=$(MODULES:=.cmo)
 OCAMLBUILD=ocamlbuild -use-ocamlfind
 MAIN=main.byte # start match/messaging
@@ -13,6 +13,8 @@ check:
 
 clean:
 	ocamlbuild -clean
+	rm -rf final_project.zip
+
 
 test:
 	$(OCAMLBUILD) -tag 'debug' 'test_state.byte' && ./'test_state.byte'
