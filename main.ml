@@ -9,34 +9,36 @@ let waiting_room st =
 
 (** [fill_prefs user q_list new_prefs] prompts [user] to fill out questionnaire
     [q_list] and updates prefs to [new_prefs] *)
-let rec fill_prefs user q_list new_prefs =
+let rec fill_prefs user q_list new_prefs survey =
   match q_list with
   | [] -> begin
       print_endline "Thank you for completing the survey!";
       Client.update_prefs user (List.rev new_prefs)
     end
   | h :: t -> begin
-      Survey.print_question h;
-      try fill_prefs user t (Survey.check_ans h (read_line ()) :: new_prefs)
+      Survey.print_question survey (Survey.get_qid h);
+      try fill_prefs user t (Survey.check_ans survey (Survey.get_qid h) 
+                               (read_line ()) :: new_prefs) survey
       with
         Failure _ -> begin
           print_endline "Invalid entry";
-          fill_prefs user q_list new_prefs
+          fill_prefs user q_list new_prefs survey
         end
     end
 
 (** [sign_up st] collects profile input to create a new user profile *)
-let rec sign_up st =
+let rec sign_up st survey =
   print_endline "Please enter your name to begin the questionaire.";
   print_string  "> ";
   try let name = read_line () in
     if String.length name < 1 then failwith "Invalid Entry" else
       let user = Client.make_user name (List.length (State.get_users st)) in 
-      fill_prefs user Survey.question_list (Client.get_preferences user);
+      fill_prefs user (Survey.question_list survey) 
+        (Client.get_preferences user) survey;
       let new_user_state = State.add_user st (Client.get_uid user) user in 
       waiting_room new_user_state
   with
-  | _ -> print_endline "Invalid entry"; sign_up st
+  | _ -> print_endline "Invalid entry"; sign_up st survey
 
 let log_in x =
   failwith "Unimplemented"
@@ -47,7 +49,8 @@ let rec execute_system dummy =
   try
     let start = read_int () in
     let init_state = State.init_state () in 
-    if start = 0 then sign_up init_state 
+    let survey = Yojson.Basic.from_file "survey1.json" |> Survey.from_json in 
+    if start = 0 then sign_up init_state survey
     else if start = 1 then log_in init_state 
     else failwith "Invalid entry"
   with

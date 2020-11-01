@@ -5,30 +5,64 @@
    A survey is a set-like list.
 *)
 
-(** The abstract type of values representing a question *)
+(** The abstract type of values representing a survey *)
 type t 
+(** The abstract type representing a question in a survey *)
+type q 
+(** The abstract type representing a possible answer in a survey *)
+type a
+(** The abstract type representing a question type *)
+type qtype 
+type qid = string 
+type aid = string
 
-(** [empty] creates an empty survey. *)
-val empty : t list
 
-(** [check_ans q ans] checks if [ans] is a valid answer to [q] *)
-val check_ans : t -> string -> int
+(** [from_json j] is the survey that [j] represents.
+    Requires: [j] is a valid JSON survey representation. *)
+val from_json : Yojson.Basic.t -> t
+
+(** [question_list s] is the current list of questions in the survey [s]. *)
+val question_list : t -> q list
+
+(** [answer_list s id] is the list of possible answers to question [q] in 
+    survey [s] 
+    Raises: Failure if [id] is not valid *)
+val answer_list : t -> qid -> a list  
+
+(** [find_q s id] finds the question with id [id] in the survey [s] 
+    Raises: Failure if [id] is not valid *)
+val find_q : t -> qid -> q 
+
+(** [get_qid qu] returns the id of question [qu] *)
+val get_qid : q -> qid 
+
+(** [check_ans s id ans] checks if [ans] is a valid answer to the question [q] 
+    in survey [s]. Returns [ans] as an int if valid. 
+    Raises: Failure if [ans] is not valid *)
+val check_ans : t -> qid -> aid -> int
 
 (** [add_question sur qu] adds [qu] to [sur] and returns a set-like list. *)
-val add_question : t list -> t -> t list
+val add_question : t -> q -> t
 
-(** [rem_question q sur] removes the question with "question" field [q]
-    from [sur]. *)
-val rem_question : string -> t list -> t list
+(** [type_of_question s id] returns the qtype corresponding to the question 
+    with id [id] in survey [s]
+    Raises: Failure if [id] is not valid *)
+val type_of_question : t -> qid -> qtype 
 
-(** [print_question q] pretty-prints [q] and its answers *)
-val print_question : t -> unit
+(** [print_question s id] pretty-prints the question with id [id] from survey 
+    [s] and its answers 
+    Requires: [id] is a valid question id in survey [s]*)
+val print_question : t -> qid -> unit
 
-(** [question_list] is the current list of questions in the survey. *)
-val question_list : t list
 
-(** Survey questions for testing *)
-val q1 : t
-val q2 : t
-val q3 : t
-val q4 : t
+(* FOR TESTING ONLY *)
+val q_list : q list 
+val q1_ans : a list 
+val q2_ans : a list 
+val q3_ans : a list 
+val q4_ans : a list 
+val q4_rec : q
+val q1_type : qtype
+val q2_type : qtype
+
+

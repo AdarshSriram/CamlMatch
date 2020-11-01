@@ -1,0 +1,88 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "How much do you like sticky notes?",
+      "qtype": "Rng",
+      "answers": [
+        {
+          "aid": "0",
+          "answer": "I hate them!"
+        },
+        {
+          "aid": "1",
+          "answer": "I do not like them"
+        },
+        {
+          "aid": "2",
+          "answer": "They're useful"
+        },
+        {
+          "aid": "3",
+          "answer": "I love them!"
+        }
+      ]
+    },
+    {
+      "id": "q2",
+      "question": "What is your favorite season?",
+      "qtype": "Opt",
+      "answers": [
+        {
+          "aid": "0",
+          "answer": "Fall"
+        },
+        {
+          "aid": "1",
+          "answer": "Spring"
+        },
+        {
+          "aid": "2",
+          "answer": "Winter"
+        },
+        {
+          "aid": "3",
+          "answer": "Summer"
+        }
+      ]
+    },
+    {
+      "id": "q3",
+      "question": "RPCC or Appel",
+      "qtype": "Opt",
+      "answers": [
+        {
+          "aid": "0",
+          "answer": "RPCC"
+        },
+        {
+          "aid": "1",
+          "answer": "Appel"
+        }
+      ]
+    },
+    {
+      "id": "q4",
+      "question": "How many hours do you spend on social media every day?",
+      "qtype": "Rng",
+      "answers": [
+        {
+          "aid": "0",
+          "answer": "0-2 hours"
+        },
+        {
+          "aid": "1",
+          "answer": "3-5 hours"
+        },
+        {
+          "aid": "2",
+          "answer": "6-10 hours"
+        },
+        {
+          "aid": "3",
+          "answer": "11+ hours"
+        }
+      ]
+    }
+  ]
+}
