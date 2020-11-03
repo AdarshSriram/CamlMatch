@@ -3,7 +3,7 @@
     {
       "id": "q1",
       "question": "How much do you like sticky notes?",
-      "qtype": "Rng",
+      "qtype": "RNG",
       "answers": [
         {
           "aid": "0",
@@ -26,7 +26,7 @@
     {
       "id": "q2",
       "question": "What is your favorite season?",
-      "qtype": "Opt",
+      "qtype": "OPT",
       "answers": [
         {
           "aid": "0",
@@ -49,7 +49,7 @@
     {
       "id": "q3",
       "question": "RPCC or Appel",
-      "qtype": "Opt",
+      "qtype": "OPT",
       "answers": [
         {
           "aid": "0",
@@ -64,7 +64,7 @@
     {
       "id": "q4",
       "question": "How many hours do you spend on social media every day?",
-      "qtype": "Rng",
+      "qtype": "RNG",
       "answers": [
         {
           "aid": "0",

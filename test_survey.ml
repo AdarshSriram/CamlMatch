@@ -50,7 +50,7 @@ let survey_tests = [
     Survey.q3_ans;
 
   "find q test; qid of q4 returns question 4" >:: (fun _ -> 
-      assert_equal Survey.q4_rec (Survey.find_q survey1 "q4"));
+      assert_equal Survey.q4_rec (Survey.find_q Survey.q_list "q4"));
 
   "get_qid test; question 4 has qid of q4" >:: (fun _ -> 
       assert_equal "q4" (Survey.get_qid Survey.q4_rec));

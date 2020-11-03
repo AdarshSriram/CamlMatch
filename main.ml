@@ -43,7 +43,7 @@ let rec sign_up st survey =
 let log_in x =
   failwith "Unimplemented"
 
-(** [execute_system summy] starts a session for a user *)
+(** [execute_system dummy] starts a session for a user *)
 let rec execute_system dummy =
   print_string  "> ";
   try

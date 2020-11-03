@@ -4,25 +4,23 @@ open Yojson.Basic.Util
 type qid = string
 type aid = string
 
-type answer = {
+
+type qtype = | RNG | OPT
+
+(* q_type is 0 if discrete and 1 if range *)
+type t = Yojson.Basic.t 
+
+type a = {
   a_id: aid;
   a_str: string
 }
 
-type qtype = | Rng | Opt
-
-(* q_type is 0 if discrete and 1 if range *)
-type question = {
+type q = {
   id : qid;
   q_str : string;
   q_type : qtype; 
-  ans : answer list
+  ans : a list
 }
-
-type t = Yojson.Basic.t 
-type q = question
-type a = answer
-
 
 let from_json json = json
 
@@ -47,8 +45,8 @@ let to_answer_type a = {
 (** [qtype_of_string str] converts [str] into a qtype 
     Raises: Failure if str does not equal Rng or Opt *)
 let qtype_of_string str = 
-  if str = "Rng" then Rng 
-  else if str = "Opt" then Opt 
+  if str = "RNG" then RNG 
+  else if str = "OPT" then OPT 
   else failwith "Invalid question type"
 
 (** [to_question_type q] converts [q] into a question record *)
@@ -79,8 +77,8 @@ let rec get_q q = function
   | [] -> failwith "Invalid question id"
   | h :: t -> if h.id = q then h else get_q q t 
 
-let find_q s q = 
-  question_list s |> get_q q 
+let find_q qlist q = 
+  get_q q qlist 
 
 let get_qid q = q.id
 
@@ -106,18 +104,14 @@ let check_ans s q ans =
 let add_question lst q =
   failwith "Unimplemented"
 
-(** [find_q_type q qlist] returns the qtype of the question with id [q]
-    Raises: Failure if [q] is not a valid id *)
-let rec find_q_type q = function 
-  | [] -> failwith "Invalid question id"
-  | h :: t -> if h.id = q then h.q_type else find_q_type q t
-
 let type_of_question s q = 
   let q_list = question_list s in 
-  find_q_type q q_list 
+  let quest = get_q q q_list in 
+  quest.q_type
 
 let print_question s q =
-  let quest = find_q s q in 
+  let q_list = question_list s in 
+  let quest = find_q q_list q in 
   print_endline quest.q_str;
   print_string "| ";
   let rec ans = function
@@ -156,7 +150,7 @@ let q1_ans = [q1_ans0; q1_ans1; q1_ans2; q1_ans3]
 let q1_rec = {
   id = "q1";
   q_str = "How much do you like sticky notes?";
-  q_type = Rng;
+  q_type = RNG;
   ans = q1_ans
 }
 
@@ -185,7 +179,7 @@ let q2_ans = [q2_ans0; q2_ans1; q2_ans2; q2_ans3]
 let q2_rec = {
   id = "q2";
   q_str = "What is your favorite season?";
-  q_type = Opt;
+  q_type = OPT;
   ans = q2_ans
 }
 
@@ -204,7 +198,7 @@ let q3_ans = [q3_ans0; q3_ans1]
 let q3_rec = {
   id = "q3";
   q_str = "RPCC or Appel";
-  q_type = Opt;
+  q_type = OPT;
   ans = q3_ans
 }
 
@@ -233,11 +227,11 @@ let q4_ans = [q4_ans0; q4_ans1; q4_ans2; q4_ans3]
 let q4_rec = {
   id = "q4";
   q_str = "How many hours do you spend on social media every day?";
-  q_type = Rng;
+  q_type = RNG;
   ans = q4_ans
 }
 
 let q_list = [q1_rec; q2_rec; q3_rec; q4_rec]
 
-let q1_type = Rng 
-let q2_type = Opt
+let q1_type = RNG 
+let q2_type = OPT

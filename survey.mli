@@ -29,9 +29,10 @@ val question_list : t -> q list
     Raises: Failure if [id] is not valid *)
 val answer_list : t -> qid -> a list  
 
-(** [find_q s id] finds the question with id [id] in the survey [s] 
+(** [find_q qlist id] finds the question with id [id] in the question 
+    list [q list] 
     Raises: Failure if [id] is not valid *)
-val find_q : t -> qid -> q 
+val find_q : q list -> qid -> q 
 
 (** [get_qid qu] returns the id of question [qu] *)
 val get_qid : q -> qid 
