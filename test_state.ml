@@ -62,7 +62,7 @@ let get_u_by_id_test name store id res =
 
 let store_test name state =
   name >:: (fun _ -> 
-      assert_equal state.user_list (store_users state; get_user_data "Users.json"))
+      assert_equal (get_user_data "Users.json") (store_users state ).user_list)
 
 let store_tests = [
   (*get_chats_test "Get user 1 chat" test_store "1" 1;*)

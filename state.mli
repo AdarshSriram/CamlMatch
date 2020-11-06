@@ -22,7 +22,7 @@ val add_user: state -> Client.uid -> Yojson.Basic.t -> state
 *)
 val get_user_by_id : state -> Client.uid -> Client.t
 
-val store_users : state -> unit
+val store_users : state -> state
 
 val get_user_data : string -> Yojson.Basic.t
 
