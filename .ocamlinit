@@ -1,5 +1,6 @@
 #require "ounit2";;
 #require "ANSITerminal";;
+#require "yojson";;
 #directory "_build";;
 #load "main.cmo";;
 #load "state.cmo";;

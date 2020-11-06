@@ -38,9 +38,9 @@ val find_q : q list -> qid -> q
 val get_qid : q -> qid 
 
 (** [check_ans s id ans] checks if [ans] is a valid answer to the question [q] 
-    in survey [s]. Returns [ans] as an int if valid. 
+    in survey [s]. Returns [ans] if valid. 
     Raises: Failure if [ans] is not valid *)
-val check_ans : t -> qid -> aid -> int
+val check_ans : t -> qid -> aid -> string
 
 (** [add_question sur qu] adds [qu] to [sur] and returns a set-like list. *)
 val add_question : t -> q -> t

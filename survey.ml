@@ -85,7 +85,7 @@ let get_qid q = q.id
 let check_ans s q ans =
   let a_list = answer_list s q in
   let aid_list = List.map (fun a -> a.a_id) a_list in 
-  if List.mem ans aid_list then int_of_string ans
+  if List.mem ans aid_list then ans
   else failwith "Invalid entry"
 
 (* let  rec same_ans b y1 y2 = 

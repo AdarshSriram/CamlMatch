@@ -1,13 +1,13 @@
-type uid = int 
-type curr_chat = int*uid
+open Yojson.Basic.Util
+
+type uid = string 
 exception UserNotFound of uid
 
 type online_user = {
   user_id : uid;
   name : string;
-  mutable preferences : int list;
-  mutable matches : online_user list;
-  mutable current_chat : curr_chat option;
+  mutable preferences : (string*string) list;
+  mutable matches : uid list;
 }
 
 type t = online_user 
@@ -17,7 +17,6 @@ let make_user n id = {
   name = n;
   preferences = [];
   matches = [];
-  current_chat = None;
 }
 
 let get_uid user = user.user_id
@@ -28,18 +27,48 @@ let get_preferences user = user.preferences
 
 let get_matches user = user.matches
 
-let get_current_chat user = user.current_chat
-
 let update_prefs user p_list = 
   user.preferences <- p_list
 
 let update_matches user m = 
   user.matches <- List.sort_uniq Stdlib.compare (m :: user.matches)
 
-let update_current_chat user chat_id user2 = 
-  user.current_chat <- Some (chat_id, user2.user_id);
-  user2.current_chat <- Some (chat_id, user.user_id)
-
 let rec user_of_uid id = function 
   | [] -> raise (UserNotFound id)
   | h :: t -> if h.user_id = id then h else user_of_uid id t
+
+let jsonify_list x =
+  `List (List.map (fun id -> `String id) x)
+
+let jsonify_option x =
+  match x with 
+  | None -> `Null
+  | Some (chat, uid) -> `List [`Int chat; `String uid]
+
+let jsonify_assoc l =
+  `Assoc (List.map (fun (q, ans) -> (q, `String ans)) l)
+
+let to_json (user:online_user)= 
+  `Assoc [
+    ("user_id", `String user.user_id);
+    ("name", `String user.name);
+    ("preferences", jsonify_assoc user.preferences);
+    ("matches", jsonify_list user.matches)
+  ] 
+
+let read_json json =
+  let id = json |> member "user_id" |> to_string in 
+  let name = json |> member "name" |> to_string in 
+  let prefs = json |> member "preferences" |> to_assoc |> 
+              List.map (fun x -> match x with 
+                  | (q, `String ans) -> (q, ans) 
+                  | _ -> failwith "json error") in 
+  let matches = json |> member "matches" |> to_list |>
+                List.map (fun x -> match x with 
+                    |`String uid -> uid | _-> failwith "json error") in
+  {
+    user_id = id;
+    name = name;
+    preferences = prefs;
+    matches = matches;
+  }

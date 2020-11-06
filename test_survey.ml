@@ -24,7 +24,7 @@ let check_ans_test
     (aid: Survey.aid)
     (expected_output : int) : test = 
   name >:: (fun _ -> 
-      assert_equal expected_output (Survey.check_ans s id aid))
+      assert_equal (string_of_int expected_output) (Survey.check_ans s id aid))
 
 let type_of_question_test 
     (name : string) 

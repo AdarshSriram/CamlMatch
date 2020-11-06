@@ -16,9 +16,11 @@ let rec fill_prefs user q_list new_prefs survey =
       Client.update_prefs user (List.rev new_prefs)
     end
   | h :: t -> begin
-      Survey.print_question survey (Survey.get_qid h);
-      try fill_prefs user t (Survey.check_ans survey (Survey.get_qid h) 
-                               (read_line ()) :: new_prefs) survey
+      let qid = Survey.get_qid h in
+      Survey.print_question survey (qid);
+      try 
+        let ans = Survey.check_ans survey qid (read_line ()) in
+        fill_prefs user t ((qid, (ans)) :: new_prefs) survey
       with
         Failure _ -> begin
           print_endline "Invalid entry";
@@ -32,10 +34,10 @@ let rec sign_up st survey =
   print_string  "> ";
   try let name = read_line () in
     if String.length name < 1 then failwith "Invalid Entry" else
-      let user = Client.make_user name (List.length (State.get_users st)) in 
+      let user = Client.make_user name ( State.get_users st |> List.length |> string_of_int) in 
       fill_prefs user (Survey.question_list survey) 
         (Client.get_preferences user) survey;
-      let new_user_state = State.add_user st (Client.get_uid user) user in 
+      let new_user_state = State.add_user st (Client.get_uid user) (Client.to_json user) in 
       waiting_room new_user_state
   with
   | _ -> print_endline "Invalid entry"; sign_up st survey
