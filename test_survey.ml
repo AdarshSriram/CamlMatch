@@ -22,9 +22,9 @@ let check_ans_test
     (s: Survey.t) 
     (id: Survey.qid)
     (aid: Survey.aid)
-    (expected_output : int) : test = 
+    (expected_output : string) : test = 
   name >:: (fun _ -> 
-      assert_equal (string_of_int expected_output) (Survey.check_ans s id aid))
+      assert_equal (expected_output) (Survey.check_ans s id aid))
 
 let type_of_question_test 
     (name : string) 
@@ -55,8 +55,8 @@ let survey_tests = [
   "get_qid test; question 4 has qid of q4" >:: (fun _ -> 
       assert_equal "q4" (Survey.get_qid Survey.q4_rec));
 
-  check_ans_test "answer 0 is valid for question 1" survey1 "q1" "0" 0;
-  check_ans_test "answer 3 is valid for question 2" survey1 "q2" "3" 3;
+  check_ans_test "answer 0 is valid for question 1" survey1 "q1" "0" "0";
+  check_ans_test "answer 3 is valid for question 2" survey1 "q2" "3" "3";
 
   type_of_question_test "question 1 has an Rng type" survey1 "q1" 
     Survey.q1_type;

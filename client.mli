@@ -14,16 +14,19 @@ type uid = string
 (** Raised when unknown online user is encountered *)
 exception UserNotFound of uid
 
-(** [make_user n id] creates a user with an user id [id], a name [n], 
-    no preferences, no current chats, and no matches 
+(** [make_user n p id] creates a user with an user id [id], a name [n], 
+    a password [p], no preferences, no current chats, and no matches 
     Requires: [id] must be unique/unused *)
-val make_user : string -> uid -> t 
+val make_user : string -> string -> uid -> t 
 
 (** [get_uid user] returns the user id of the [user] *)
 val get_uid : t -> uid 
 
 (** [get_name user] returns the name of the [user] *)
 val get_name : t -> string 
+
+(** [get_login user] returns the user name and password of [user] *)
+val get_login : t -> string*string
 
 (** [get_preferences user] returns the list of preferences of the [user]. 
     Returns the empty list if [user] has no preferences*)

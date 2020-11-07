@@ -6,15 +6,17 @@ exception UserNotFound of uid
 type online_user = {
   user_id : uid;
   name : string;
+  pword : string;
   mutable preferences : (string*string) list;
   mutable matches : uid list;
 }
 
 type t = online_user 
 
-let make_user n id = {
+let make_user n p id = {
   user_id = id;
   name = n;
+  pword = p;
   preferences = [];
   matches = [];
 }
@@ -22,6 +24,8 @@ let make_user n id = {
 let get_uid user = user.user_id
 
 let get_name user = user.name
+
+let get_login user = (user.name, user.pword)
 
 let get_preferences user = user.preferences
 
@@ -40,11 +44,6 @@ let rec user_of_uid id = function
 let jsonify_list x =
   `List (List.map (fun id -> `String id) x)
 
-let jsonify_option x =
-  match x with 
-  | None -> `Null
-  | Some (chat, uid) -> `List [`Int chat; `String uid]
-
 let jsonify_assoc l =
   `Assoc (List.map (fun (q, ans) -> (q, `String ans)) l)
 
@@ -52,6 +51,7 @@ let to_json (user:online_user)=
   `Assoc [
     ("user_id", `String user.user_id);
     ("name", `String user.name);
+    ("password", `String user.pword);
     ("preferences", jsonify_assoc user.preferences);
     ("matches", jsonify_list user.matches)
   ] 
@@ -59,6 +59,7 @@ let to_json (user:online_user)=
 let read_json json =
   let id = json |> member "user_id" |> to_string in 
   let name = json |> member "name" |> to_string in 
+  let pword = json |> member "password" |> to_string in 
   let prefs = json |> member "preferences" |> to_assoc |> 
               List.map (fun x -> match x with 
                   | (q, `String ans) -> (q, ans) 
@@ -69,6 +70,7 @@ let read_json json =
   {
     user_id = id;
     name = name;
+    pword = pword;
     preferences = prefs;
     matches = matches;
   }

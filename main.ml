@@ -34,10 +34,13 @@ let rec sign_up st survey =
   print_string  "> ";
   try let name = read_line () in
     if String.length name < 1 then failwith "Invalid Entry" else
-      let user = Client.make_user name ( State.get_users st |> List.length |> string_of_int) in 
+      let user = Client.make_user name "" 
+          ( State.get_users st |> List.length |> string_of_int) in 
       fill_prefs user (Survey.question_list survey) 
         (Client.get_preferences user) survey;
-      let new_user_state = State.add_user st (Client.get_uid user) (Client.to_json user) in 
+      let new_user_state = State.add_user st (Client.get_uid user) 
+          (Client.to_json user) 
+      in 
       waiting_room new_user_state
   with
   | _ -> print_endline "Invalid entry"; sign_up st survey
@@ -50,7 +53,7 @@ let rec execute_system dummy =
   print_string  "> ";
   try
     let start = read_int () in
-    let init_state = State.init_state () in 
+    let init_state = State.get_state "Users.json" in 
     let survey = Yojson.Basic.from_file "survey1.json" |> Survey.from_json in 
     if start = 0 then sign_up init_state survey
     else if start = 1 then log_in init_state 

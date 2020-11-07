@@ -15,6 +15,13 @@ let get_name_test
   name >:: (fun _ -> 
       assert_equal expected_output (Client.get_name t))
 
+let get_login_test 
+    (name : string)
+    (t : Client.t) 
+    (expected_output : string*string) : test = 
+  name >:: (fun _ -> 
+      assert_equal expected_output (Client.get_login t))
+
 let get_pref_test 
     (name : string)
     (t : Client.t) 
@@ -28,13 +35,6 @@ let get_matches_test
     (expected_output : Client.uid list) : test = 
   name >:: (fun _ -> 
       assert_equal expected_output (Client.get_matches t))
-
-(*let get_chats_test 
-    (name : string)
-    (t : Client.t) 
-    (expected_output : Client.curr_chat option) : test = 
-  name >:: (fun _ -> 
-      assert_equal expected_output (Client.get_current_chat t))*)
 
 let user_of_id_test
     (name : string)
@@ -52,14 +52,15 @@ let user_of_id_raises_test
       assert_raises (Client.UserNotFound id) 
         (fun () -> Client.user_of_uid id lst))
 
-let u1 = Client.make_user "user 1" "1" 
-let u2 = Client.make_user "user 2" "2"
-let u3 = Client.make_user "user 3" "3"
+let u1 = Client.make_user "user 1" "pass1" "1" 
+let u2 = Client.make_user "user 2" "pass1" "2"
+let u3 = Client.make_user "user 3" "pass1" "3"
 
 let client_tests = [
   (* Testing make_user *)
   get_id_test "User id of u1 is 1" u1 "1"; 
   get_name_test "Name of u1 is user 1" u1 "user 1";
+  get_login_test "Creditials is user 1 pass1" u1 ("user 1", "pass1");
   get_pref_test "Preferences of user 1 is []" u1 [];
   get_matches_test "User 1 has no matches" u1 [];
   (*get_chats_test "User 1 has no chats" u1 None;*)
