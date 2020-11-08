@@ -109,6 +109,8 @@ let type_of_question s q =
   let quest = get_q q q_list in 
   quest.q_type
 
+
+
 let print_question s q =
   let q_list = question_list s in 
   let quest = find_q q_list q in 
