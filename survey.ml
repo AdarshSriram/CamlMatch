@@ -109,7 +109,36 @@ let type_of_question s q =
   let quest = get_q q q_list in 
   quest.q_type
 
+let score_rng a1 a2 q = 
+  let div = List.length q.ans in 
+  (float_of_string a1 +. float_of_string a2) /. float_of_int div
 
+let score_opt a1 a2 = 
+  if a1 = a2 then 1. else 0.
+
+(* This iterates through preference lists of both users and call
+   score_rng or score_opt to calculare the total score *)
+let rec score_aux score p1 p2 survey = 
+  match p1 with 
+  | [] -> score 
+  | (qid1, a1) :: t1 -> begin 
+      match p2 with 
+      | [] -> failwith "Incomplete preferences list"
+      | (qid2, a2) :: t2 -> begin 
+          if qid1 <> qid2 then failwith "Preference list not in order" 
+          else
+            let q = get_q qid1 survey in 
+            if q.q_type = RNG 
+            then score_aux (score +. score_rng a1 a2 q) t1 t2 survey
+            else score_aux (score +. score_opt a1 a2) t1 t2 survey
+        end
+    end
+
+(* returns match score of 2 users *)
+let match_score u1 u2 survey = 
+  let pref1 = Client.get_preferences u1 in 
+  let pref2 = Client.get_preferences u2 in 
+  score_aux 0. pref1 pref2 survey
 
 let print_question s q =
   let q_list = question_list s in 
