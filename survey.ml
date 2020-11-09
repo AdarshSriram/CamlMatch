@@ -140,6 +140,13 @@ let match_score u1 u2 survey =
   let pref2 = Client.get_preferences u2 in 
   score_aux 0. pref1 pref2 survey
 
+(* should go thru user list and call match_score on
+   user and each user. make sure match_score isnt called
+   on the same user twice. *)
+let compile_matches user state = 
+  let users = State.get_users state in 
+  failwith "Unimplemented"
+
 let print_question s q =
   let q_list = question_list s in 
   let quest = find_q q_list q in 
