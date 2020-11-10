@@ -36,3 +36,13 @@ val print_users : state -> unit
     combination is valid in state [st]. 
     Raises: [InvalidUser] if the combination is not valid *)
 val validate_user : state -> string -> string -> Client.t 
+
+(* FOR TESTING ONLY *)
+val test_state : state
+
+val u1 : Yojson.Basic.t
+val u2 : Yojson.Basic.t
+val u3 : Yojson.Basic.t
+val u4 : Yojson.Basic.t
+val u5 : Yojson.Basic.t
+val u6 : Client.t

@@ -71,4 +71,4 @@ val q4_rec : q
 val q1_type : qtype
 val q2_type : qtype
 
-
+val match_score : (qid * string) list -> (qid * string) list -> q list -> float

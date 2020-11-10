@@ -110,8 +110,8 @@ let type_of_question s q =
   quest.q_type
 
 let score_rng a1 a2 q = 
-  let div = float_of_int (List.length q.ans) in 
-  (1. -. Float.abs (float_of_string a1 +. float_of_string a2)) /. div
+  let div = float_of_int (List.length q.ans) -. 1. in 
+  1. -. (Float.abs (float_of_string a1 +. float_of_string a2) /. div)
 
 let score_opt a1 a2 = 
   if a1 = a2 then 1. else 0.
@@ -134,7 +134,7 @@ let rec score_aux score p1 p2 survey =
         end
     end
 
-(* returns match score of 2 users *)
+(* calculates match score of 2 users *)
 let match_score p1 p2 survey = 
   score_aux 0. p1 p2 survey
 

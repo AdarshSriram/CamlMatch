@@ -59,3 +59,20 @@ let validate_user st n p =
       end
   in
   match_creds cred_list
+
+let u1 = Client.to_json (Client.make_user "user 1" "pass1" "1" )
+let u2 = Client.to_json (Client.make_user "user 2" "pass2" "2")
+let u3 = Client.make_user "user 3" "pass3" "3" |> Client.to_json
+let u4 = Client.make_user "user 4" "pass4" "4" |> Client.to_json
+let u5 = Client.make_user "user 5" "pass5" "5" |> Client.to_json
+
+let u6 = 
+  let user  = (Client.make_user "user 6" "pass6" "6" ) in 
+  Client.update_matches user "2";
+  Client.update_matches user "3";
+  Client.update_prefs user [("1", "2");("2", "1")]; user 
+
+let test_state = 
+  { 
+    user_list = `Assoc [("1", u1);("2", u2);("3", u3);("4", u4)];
+  }
