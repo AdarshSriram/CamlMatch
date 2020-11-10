@@ -110,13 +110,13 @@ let type_of_question s q =
   quest.q_type
 
 let score_rng a1 a2 q = 
-  let div = List.length q.ans in 
-  (float_of_string a1 +. float_of_string a2) /. float_of_int div
+  let div = float_of_int (List.length q.ans) in 
+  (1. -. Float.abs (float_of_string a1 +. float_of_string a2)) /. div
 
 let score_opt a1 a2 = 
   if a1 = a2 then 1. else 0.
 
-(* This iterates through preference lists of both users and call
+(* This iterates through preference lists of both users and calls
    score_rng or score_opt to calculare the total score *)
 let rec score_aux score p1 p2 survey = 
   match p1 with 
@@ -135,17 +135,26 @@ let rec score_aux score p1 p2 survey =
     end
 
 (* returns match score of 2 users *)
-let match_score u1 u2 survey = 
-  let pref1 = Client.get_preferences u1 in 
-  let pref2 = Client.get_preferences u2 in 
-  score_aux 0. pref1 pref2 survey
+let match_score p1 p2 survey = 
+  score_aux 0. p1 p2 survey
+
+let rec compile_helper state user acc ulst survey = 
+  match ulst with 
+  | [] -> acc 
+  | h :: t -> begin 
+      let u = State.get_user_by_id state h in
+      let match_prefs = Client.get_preferences u in
+      let new_acc = (h, match_score user match_prefs) :: acc in 
+      compile_helper state user new_acc t survey 
+    end
 
 (* should go thru user list and call match_score on
    user and each user. make sure match_score isnt called
    on the same user twice. *)
-let compile_matches user state = 
+let compile_matches user state survey = 
   let users = State.get_users state in 
-  failwith "Unimplemented"
+  let user_prefs = Client.get_preferences user in
+  compile_helper state user_prefs [] users survey
 
 let print_question s q =
   let q_list = question_list s in 
