@@ -144,9 +144,13 @@ let rec compile_helper state user acc ulst survey =
   | h :: t -> begin 
       let u = State.get_user_by_id state h in
       let match_prefs = Client.get_preferences u in
-      let new_acc = (h, match_score user match_prefs) :: acc in 
+      let new_acc = (h, match_score user match_prefs survey) :: acc in 
       compile_helper state user new_acc t survey 
     end
+
+(* TODO *)
+let sort_match lst = 
+  lst
 
 (* should go thru user list and call match_score on
    user and each user. make sure match_score isnt called
@@ -154,7 +158,8 @@ let rec compile_helper state user acc ulst survey =
 let compile_matches user state survey = 
   let users = State.get_users state in 
   let user_prefs = Client.get_preferences user in
-  compile_helper state user_prefs [] users survey
+  let uns_lst = compile_helper state user_prefs [] users survey in 
+  sort_match uns_lst
 
 let print_question s q =
   let q_list = question_list s in 
