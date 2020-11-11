@@ -7,6 +7,7 @@ type state = {
   user_list: Yojson.Basic.t;
 }
 exception InvalidUser
+exception InvalidMatch
 
 (** [init_state] is the inital state of the application*)
 val init_state: unit -> state
@@ -37,6 +38,16 @@ val print_users : state -> unit
     Raises: [InvalidUser] if the combination is not valid *)
 val validate_user : state -> string -> string -> Client.t 
 
+(** [send_notification st user m_name msg] sends [msg] from [user] to the match 
+    with name [m_name] 
+    Raises: [InvalidMatch] if [m_name] is not a match of [user] or 
+    if [m_name] is not an existing user *)
+val send_notification : state -> Client.t -> string -> string -> state 
+
+(** [read_notifs user] pretty-prints the [user]'s notfications to the 
+    console *)
+val read_notifs : state -> Client.t -> unit
+
 (* FOR TESTING ONLY *)
 val test_state : state
 
@@ -46,3 +57,4 @@ val u3 : Yojson.Basic.t
 val u4 : Yojson.Basic.t
 val u5 : Yojson.Basic.t
 val u6 : Client.t
+

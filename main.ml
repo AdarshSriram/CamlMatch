@@ -4,7 +4,7 @@ let rec prompt_command user =
 
 (** [waiting_room st] tells user to wait while they are matched to other users
     in state [st] *)
-let waiting_room st = 
+let waiting_room user st = 
   ()
 (** [fill_prefs user q_list new_prefs] prompts [user] to fill out questionnaire
     [q_list] and updates prefs to [new_prefs] *)
@@ -41,7 +41,7 @@ let rec sign_up st survey =
           (Client.to_json user) 
       in 
       print_endline "Please wait while we calculate your matches.";
-      waiting_room new_user_state
+      waiting_room user new_user_state
   with
   | _ -> print_endline "Invalid entry"; sign_up st survey
 
@@ -53,7 +53,7 @@ let rec log_in st =
     print_string "> ";
     let pass = read_line () in
     let user = State.validate_user st name pass in 
-    waiting_room st
+    waiting_room user st
   with
   | State.InvalidUser -> 
     print_endline "This name and password combination was not found."; log_in st

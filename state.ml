@@ -2,6 +2,8 @@ open Yojson.Basic.Util
 open Yojson.Basic
 
 exception InvalidUser
+exception InvalidMatch
+
 type state = {
   user_list: Yojson.Basic.t;
 }
@@ -60,6 +62,52 @@ let validate_user st n p =
   in
   match_creds cred_list
 
+(** [get_user_recs st] returns the list of user records *)
+let get_user_recs st = 
+  let assoc_list = st.user_list |> to_assoc in
+  let usrs = List.split assoc_list |> snd in 
+  List.map Client.read_json usrs 
+
+let rec find_user_by_name name = function 
+  | [] -> raise (InvalidMatch)
+  | h :: t ->  begin 
+      if Client.get_name h = name then h 
+      else find_user_by_name name t
+    end 
+
+(** [replace_user user u_list] replaces the [user] in [u_list] with its 
+    updated form, [user] *)
+let rec replace_user user u_list =
+  let repl (x, y) = 
+    if Client.get_uid user = x 
+    then (Client.get_uid user, Client.to_json user) 
+    else (x, y) 
+  in 
+  List.map repl u_list 
+
+let send_notification st user m_name msg = 
+  let receiver = get_user_recs st |> find_user_by_name m_name in 
+  if not (List.mem (Client.get_uid receiver) (Client.get_matches user))
+  then raise (InvalidMatch)
+  else begin 
+    Client.update_notifs receiver m_name msg;
+    let new_ulst = replace_user receiver  (to_assoc st.user_list) in 
+    let new_state = { user_list = `Assoc new_ulst } in 
+    store_users new_state
+  end 
+
+let read_notifs st user = 
+  let rec print_to_console notifs = 
+    match notifs with
+    | [] -> Client.clear_notifs user; print_newline ()
+    | (x, y) :: t -> begin 
+        let match_name = get_user_by_id st x |> Client.get_name in 
+        print_endline (match_name ^ ":" ^"\t"  ^ y);
+        print_to_console t
+      end 
+  in
+  print_to_console (Client.get_notifs user)
+
 let u1 = Client.to_json (Client.make_user "user 1" "pass1" "1" )
 let u2 = Client.to_json (Client.make_user "user 2" "pass2" "2")
 let u3 = Client.make_user "user 3" "pass3" "3" |> Client.to_json
@@ -76,3 +124,4 @@ let test_state =
   { 
     user_list = `Assoc [("1", u1);("2", u2);("3", u3);("4", u4)];
   }
+

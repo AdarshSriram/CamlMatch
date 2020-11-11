@@ -36,6 +36,13 @@ let get_matches_test
   name >:: (fun _ -> 
       assert_equal expected_output (Client.get_matches t))
 
+let get_notifs_test 
+    (name : string)
+    (t : Client.t) 
+    (expected_output : (Client.uid*string) list) : test = 
+  name >:: (fun _ -> 
+      assert_equal expected_output (Client.get_notifs t))
+
 let user_of_id_test
     (name : string)
     (id : Client.uid) 
@@ -66,16 +73,22 @@ let client_tests = [
   (*get_chats_test "User 1 has no chats" u1 None;*)
 
   get_pref_test "Updated U1 preferences are [3;1]" 
-    (Client.update_prefs u2 [("1", "2"); ("2", "1")]; u2) [("1", "2"); ("2", "1")];
+    (Client.update_prefs u2 [("q1", "2"); ("q2", "1")]; u2) 
+    [("q1", "2"); ("q2", "1")];
 
   get_matches_test "Updated U3 matches is [u2]" 
     (Client.update_matches u3 "2"; u3) ["2"];
   get_matches_test "Adding u2 match again to U3 will result in [u2]" 
     (Client.update_matches u3 "2"; u3) ["2"];
 
-  (*get_chats_test "U3 chatting with U2 with chat id 1" 
-    (Client.update_current_chat u3 1 u2; u3) (Some (1, "2"));
-    get_chats_test "U2 chatting with U3 with chat id 1" u2 (Some (1, "3"));*)
+  get_notifs_test "U1 has no notifications" u1 [];
+  get_notifs_test "U2 has one notification" 
+    (Client.update_notifs u2 "1" "hello"; u2) [("1","hello")];
+  get_notifs_test "U3 has two notifications" 
+    (Client.update_notifs u3 "4" "bye"; 
+     Client.update_notifs u3 "1" "goodbye"; u3) 
+    [("1", "goodbye"); ("4","bye")];
+
 
   user_of_id_test "User of id 2 is u2" "2" [u1; u2; u3] u2;
   user_of_id_raises_test "UserNotFound raised with searching for id 4" 
