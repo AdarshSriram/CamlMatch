@@ -109,6 +109,58 @@ let type_of_question s q =
   let quest = get_q q q_list in 
   quest.q_type
 
+let score_rng a1 a2 q = 
+  let div = float_of_int (List.length q.ans) -. 1. in 
+  1. -. (Float.abs (float_of_string a1 +. float_of_string a2) /. div)
+
+let score_opt a1 a2 = 
+  if a1 = a2 then 1. else 0.
+
+(* This iterates through preference lists of both users and calls
+   score_rng or score_opt to calculare the total score *)
+let rec score_aux score p1 p2 survey = 
+  match p1 with 
+  | [] -> score 
+  | (qid1, a1) :: t1 -> begin 
+      match p2 with 
+      | [] -> failwith "Incomplete preferences list"
+      | (qid2, a2) :: t2 -> begin 
+          if qid1 <> qid2 then failwith "Preference list not in order" 
+          else
+            let q = get_q qid1 survey in 
+            if q.q_type = RNG 
+            then score_aux (score +. score_rng a1 a2 q) t1 t2 survey
+            else score_aux (score +. score_opt a1 a2) t1 t2 survey
+        end
+    end
+
+(* calculates match score of 2 users *)
+let match_score p1 p2 survey = 
+  score_aux 0. p1 p2 survey
+
+let rec compile_helper state user acc ulst survey = 
+  match ulst with 
+  | [] -> acc 
+  | h :: t -> begin 
+      let u = State.get_user_by_id state h in
+      let match_prefs = Client.get_preferences u in
+      let new_acc = (h, match_score user match_prefs survey) :: acc in 
+      compile_helper state user new_acc t survey 
+    end
+
+(* TODO *)
+let sort_match lst = 
+  lst
+
+(* should go thru user list and call match_score on
+   user and each user. make sure match_score isnt called
+   on the same user twice. *)
+let compile_matches user state survey = 
+  let users = State.get_users state in 
+  let user_prefs = Client.get_preferences user in
+  let uns_lst = compile_helper state user_prefs [] users survey in 
+  sort_match uns_lst
+
 let print_question s q =
   let q_list = question_list s in 
   let quest = find_q q_list q in 

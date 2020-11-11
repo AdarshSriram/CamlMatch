@@ -1,6 +1,33 @@
 open OUnit2
 open Survey
 
+let float_close_enough f1 f2 = (f1 -. f2) < 0.0001
+
+let survey1 = Survey.from_json (Yojson.Basic.from_file "survey1.json")
+
+let empty = {|{"questions": [
+  ]
+  }|}
+
+let empty_survey = Survey.from_json (Yojson.Basic.from_string empty)
+
+(* in order of closest match to u1 to least close *)
+let u1_prefs = 
+  let u = Client.read_json State.u1 in
+  Client.update_prefs u [("q1", "0"); ("q2", "0"); ("q3", "0"); ("q4", "0")];
+  u
+let u2_prefs = 
+  let u = Client.read_json State.u2 in
+  Client.update_prefs u [("q1", "1"); ("q2", "1"); ("q3", "0"); ("q4", "1")];
+  u
+let u3_prefs = 
+  let u = Client.read_json State.u3 in
+  Client.update_prefs u [("q1", "3"); ("q2", "1"); ("q3", "1"); ("q4", "2")];
+  u
+let u4_prefs = 
+  let u = Client.read_json State.u4 in
+  Client.update_prefs u [("q1", "3"); ("q2", "1"); ("q3", "1"); ("q4", "3")];
+  u
 
 let question_list_test 
     (name : string) 
@@ -34,13 +61,18 @@ let type_of_question_test
   name >:: (fun _ -> 
       assert_equal expected_output (Survey.type_of_question s id ))
 
-let survey1 = Survey.from_json (Yojson.Basic.from_file "survey1.json")
+let match_score_test 
+    (name : string) 
+    (s: Survey.t) 
+    (p1: (qid * string) list)
+    (p2: (qid * string) list)
+    (expected_output : float) : test = 
+  name >:: (fun _ -> 
+      assert_equal expected_output 
+        (Survey.match_score p1 p2 (Survey.question_list s))
+        ~printer: string_of_float
+        ~cmp: float_close_enough)
 
-let empty = {|{"questions": [
-  ]
-  }|}
-
-let empty_survey = Survey.from_json (Yojson.Basic.from_string empty)
 
 let survey_tests = [
   question_list_test "Empty survey returns empty list" empty_survey [];
@@ -63,7 +95,14 @@ let survey_tests = [
   type_of_question_test "question 2 has an Opt type" survey1 "q2" 
     Survey.q2_type;
 
-
+  match_score_test "u1 u2 should be highest match" survey1
+    (Client.get_preferences u1_prefs) (Client.get_preferences u2_prefs) 
+    (7. /. 3.);
+  match_score_test "u1 u3 should be less than u2" survey1
+    (Client.get_preferences u1_prefs) (Client.get_preferences u3_prefs) 
+    (1. /. 3.);
+  match_score_test "u1 u4 should be lowest" survey1
+    (Client.get_preferences u1_prefs) (Client.get_preferences u4_prefs) 0.;
 ]
 
 let suite = 

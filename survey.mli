@@ -50,6 +50,11 @@ val add_question : t -> q -> t
     Raises: Failure if [id] is not valid *)
 val type_of_question : t -> qid -> qtype 
 
+(** [compile_matches user state survey] returns a sorted list of matches
+    for [user] with the current user list in [state] for [survey] *) 
+val compile_matches : Client.t -> State.state -> q list -> 
+  (Client.uid * float) list
+
 (** [print_question s id] pretty-prints the question with id [id] from survey 
     [s] and its answers 
     Requires: [id] is a valid question id in survey [s]*)
@@ -66,4 +71,4 @@ val q4_rec : q
 val q1_type : qtype
 val q2_type : qtype
 
-
+val match_score : (qid * string) list -> (qid * string) list -> q list -> float
