@@ -3,6 +3,7 @@ open Yojson.Basic
 
 exception InvalidUser
 exception InvalidMatch
+exception UsernameTaken
 
 type state = {
   user_list: Yojson.Basic.t;
@@ -125,3 +126,10 @@ let test_state =
     user_list = `Assoc [("1", u1);("2", u2);("3", u3);("4", u4)];
   }
 
+let can_sign_up st name : bool =
+  let creds = get_logins st in 
+  let rec check_creds credList = 
+    match credList with
+    | [] -> true 
+    | (_, (a, _)) ::t ->  if a = name then false else check_creds t
+  in check_creds creds

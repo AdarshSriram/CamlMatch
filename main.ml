@@ -27,13 +27,25 @@ let rec fill_prefs user q_list new_prefs survey =
         end
     end
 
+(**Helper for sign_up that safely gets user's password*)
+let rec get_pwd dummy = 
+  print_endline "Please enter a password (must be more than 6 characters).";
+  print_string "> ";
+  try let pwd = read_line () in 
+    if String.length pwd < 6 then failwith "Invalid pwd" else 
+      pwd
+  with 
+  | _ -> print_endline "Invalid password"; get_pwd ()
+
 (** [sign_up st] collects profile input to create a new user profile *)
 let rec sign_up st survey =
   print_endline "Please enter your name to begin the questionaire.";
   print_string  "> ";
   try let name = read_line () in
     if String.length name < 1 then failwith "Invalid Entry" else
-      let user = Client.make_user name "" 
+    if not (State.can_sign_up st name) then raise State.UsernameTaken else
+      let pwd = get_pwd () in
+      let user = Client.make_user name pwd 
           ( State.get_users st |> List.length |> string_of_int) in 
       fill_prefs user (Survey.question_list survey) 
         (Client.get_preferences user) survey;
@@ -43,6 +55,7 @@ let rec sign_up st survey =
       print_endline "Please wait while we calculate your matches.";
       waiting_room user new_user_state
   with
+  | State.UsernameTaken -> print_endline "Username taken."; sign_up st survey
   | _ -> print_endline "Invalid entry"; sign_up st survey
 
 let rec log_in st =
