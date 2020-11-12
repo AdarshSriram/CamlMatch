@@ -8,6 +8,7 @@ type state = {
 }
 exception InvalidUser
 exception InvalidMatch
+exception UsernameTaken
 
 (** [init_state] is the inital state of the application*)
 val init_state: unit -> state
@@ -32,6 +33,8 @@ val store_users : state -> state
 val get_user_data : string -> Yojson.Basic.t
 
 val print_users : state -> unit
+
+val can_sign_up : state -> string -> bool
 
 (** [validate_user st name pword] returns the user if the [name, pword] 
     combination is valid in state [st]. 
