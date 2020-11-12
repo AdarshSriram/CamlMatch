@@ -55,6 +55,7 @@ let rec sign_up st survey =
       print_endline "Please wait while we calculate your matches.";
       waiting_room user new_user_state
   with
+  | State.UsernameTaken -> print_endline "Username taken."; sign_up st survey
   | _ -> print_endline "Invalid entry"; sign_up st survey
 
 let rec log_in st =
