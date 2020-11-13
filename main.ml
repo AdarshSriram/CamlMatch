@@ -1,3 +1,4 @@
+
 (** [prompt_command user] prompts a user command for a user not in chat. *)
 let rec prompt_command user =
   failwith "Unimplemented"
@@ -6,6 +7,7 @@ let rec prompt_command user =
     in state [st] *)
 let waiting_room user st = 
   ()
+
 (** [fill_prefs user q_list new_prefs] prompts [user] to fill out questionnaire
     [q_list] and updates prefs to [new_prefs] *)
 let rec fill_prefs user q_list new_prefs survey =
@@ -37,6 +39,16 @@ let rec get_pwd dummy =
   with 
   | _ -> print_endline "Invalid password"; get_pwd ()
 
+(** Calculates the matches for the user *)
+let calc_matches user st surv = 
+  let matches = Survey.compile_matches user st (Survey.question_list surv) in 
+  Client.update_matches user matches;
+  let updated_state = State.replace_user st user in 
+  let matched_state = State.store_users updated_state in 
+  print_endline "Here are the matches we have found: ";
+  State.print_matches matched_state user;
+  waiting_room user matched_state
+
 (** [sign_up st] collects profile input to create a new user profile *)
 let rec sign_up st survey =
   print_endline "Please enter your name to begin the questionaire.";
@@ -46,17 +58,18 @@ let rec sign_up st survey =
     if not (State.can_sign_up st name) then raise State.UsernameTaken else
       let pwd = get_pwd () in
       let user = Client.make_user name pwd 
-          ( State.get_users st |> List.length |> string_of_int) in
+          ( State.get_users st |> List.length |> string_of_int) in 
       fill_prefs user (Survey.question_list survey) 
         (Client.get_preferences user) survey;
       let new_user_state = State.add_user st (Client.get_uid user) 
           (Client.to_json user) 
       in 
       print_endline "Please wait while we calculate your matches.";
-      waiting_room user new_user_state
+      print_endline "Please wait while we find your matches.";
+      calc_matches user new_user_state survey 
   with
   | State.UsernameTaken -> print_endline "Username taken."; sign_up st survey
-  | _ -> print_endline "Invalid entry"; sign_up st survey
+  | _ -> print_endline "An error has occured"; sign_up st survey
 
 let rec print_notifs state = function 
   | [] -> ()

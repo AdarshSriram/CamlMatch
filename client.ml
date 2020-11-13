@@ -10,7 +10,7 @@ type online_user = {
   name : string;
   pword : string;
   mutable preferences : (string*string) list;
-  mutable matches : uid list;
+  mutable matches : (uid*float) list;
   mutable notifications : (uid*string) list;
 }
 
@@ -40,8 +40,8 @@ let get_notifs user = user.notifications
 let update_prefs user p_list = 
   user.preferences <- p_list
 
-let update_matches user m = 
-  user.matches <- List.sort_uniq Stdlib.compare (m :: user.matches)
+let update_matches user lst = 
+  user.matches <- lst
 
 let update_notifs user m_id str = 
   user.notifications <- (m_id, str) :: user.notifications
@@ -59,13 +59,16 @@ let jsonify_list x =
 let jsonify_assoc l =
   `Assoc (List.map (fun (q, ans) -> (q, `String ans)) l)
 
-let to_json (user:online_user)= 
+let jsonify_float_assoc lst =
+  `Assoc (List.map (fun (id, score) -> (id, `Float score)) lst)
+
+let to_json user= 
   `Assoc [
     ("user_id", `String user.user_id);
     ("name", `String user.name);
     ("password", `String user.pword);
     ("preferences", jsonify_assoc user.preferences);
-    ("matches", jsonify_list user.matches);
+    ("matches", jsonify_float_assoc user.matches);
     ("notifications", jsonify_assoc user.notifications);
   ] 
 
@@ -77,9 +80,10 @@ let read_json json =
               List.map (fun x -> match x with 
                   | (q, `String ans) -> (q, ans) 
                   | _ -> failwith "json error") in 
-  let matches = json |> member "matches" |> to_list |>
+  let matches = json |> member "matches" |> to_assoc |>
                 List.map (fun x -> match x with 
-                    |`String uid -> uid | _-> failwith "json error") in
+                    |(uid, `Float fl) -> (uid, fl)
+                    | _-> failwith "json error") in
   let notifs = json |> member "notifications" |> to_assoc |> 
                List.map (fun x -> match x with 
                    | (m_id, `String msg) -> (m_id, msg) 

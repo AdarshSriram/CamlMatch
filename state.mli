@@ -20,15 +20,15 @@ val get_state: string -> state
  * -raises: UserNotFound "No online users" if the user_list is empty. *)
 val get_users: state -> Client.uid list
 
-(* [add_user st uid] adds user [user_id] to st.user_list
- * -raises: UserExists [user_id] if user already exists. *)
+val store_users : state -> state
+
+(* [add_user st uid user] adds user with id [user_id] to [st] 
+ * Raises: UserExists [user_id] if user already exists. *)
 val add_user: state -> Client.uid -> Yojson.Basic.t -> state
 
 (** [get_user_by_id st user_id] is a tuple of corresponding (user_id*CLient.User)
 *)
 val get_user_by_id : state -> Client.uid -> Client.t
-
-val store_users : state -> state
 
 val get_user_data : string -> Yojson.Basic.t
 
@@ -41,18 +41,35 @@ val can_sign_up : state -> string -> bool
     Raises: [InvalidUser] if the combination is not valid *)
 val validate_user : state -> string -> string -> Client.t 
 
+(** [replace_user user st] replaces a user in [st] with its 
+    updated form, [user] *)
+val replace_user : state -> Client.t -> state 
+
 (** [send_notification st user m_name msg] sends [msg] from [user] to the match 
     with name [m_name] 
     Raises: [InvalidMatch] if [m_name] is not a match of [user] or 
     if [m_name] is not an existing user *)
 val send_notification : state -> Client.t -> string -> string -> state 
 
-(** [read_notifs user] pretty-prints the [user]'s notfications to the 
+(** [read_notifs st user] pretty-prints the [user]'s notfications to the 
     console *)
 val read_notifs : state -> Client.t -> unit
 
+(** [print_matches st user] pretty-prints [user's] matches to the console in 
+    the sytem's state [state] *)
+val print_matches: state -> Client.t -> unit 
+
 (* FOR TESTING ONLY *)
+val testing_store_users : state -> state
+
+(* [add_user st uid user] adds user with id [user_id] to [st] 
+ * Raises: UserExists [user_id] if user already exists. *)
+val testing_add_user: state -> Client.uid -> Yojson.Basic.t -> state
+
+
 val test_state : state
+val empty_state : state
+val pref_state : state
 
 val u1 : Yojson.Basic.t
 val u2 : Yojson.Basic.t
@@ -60,4 +77,10 @@ val u3 : Yojson.Basic.t
 val u4 : Yojson.Basic.t
 val u5 : Yojson.Basic.t
 val u6 : Client.t
+
+val pref_1 : Yojson.Basic.t
+val pref_2 : Yojson.Basic.t
+val pref_3 : Yojson.Basic.t
+val pref_4 : Yojson.Basic.t
+
 

@@ -1,7 +1,39 @@
 open OUnit2
 open Survey
 
+(** [pp_string s] pretty-prints string [s]. *)
+let pp_string s = "\"" ^ s ^ "\""
+
+(** [pp_list pp_elt lst] pretty-prints list [lst], using [pp_elt]
+    to pretty-print each element of [lst]. *)
+let pp_list pp_key pp_val lst =
+  let pp_elts lst =
+    let rec loop n acc = function
+      | [] -> acc
+      | [(x,y)] -> acc ^ "(" ^ pp_key x ^ ", " ^ pp_val y ^ ")"
+      | (x,y) :: (h2 :: t as t') ->
+        if n = 100 then acc ^ "..."  (* stop printing long list *)
+        else loop (n + 1) (acc ^ "(" ^ pp_key x ^ ", " ^ pp_val y ^ "); ") t'
+    in loop 0 "" lst
+  in "[" ^ pp_elts lst ^ "]"
+
 let float_close_enough f1 f2 = (f1 -. f2) < 0.0001
+
+let list_close_enough l1 l2 = 
+  let lens = List.length l1 = List.length l2 in 
+  let rec helper acc l1 l2 = 
+    match l1 with 
+    | [] -> acc 
+    | (x1, y1) :: t1 -> begin 
+        match l2 with 
+        | [] -> false 
+        | (x2, y2) :: t2 -> begin 
+            helper (acc && x1 = x2 && (float_close_enough y1 y2)) t1 t2
+          end
+      end 
+  in 
+  lens && helper true l1 l2
+
 
 let survey1 = Survey.from_json (Yojson.Basic.from_file "survey1.json")
 
@@ -12,22 +44,13 @@ let empty = {|{"questions": [
 let empty_survey = Survey.from_json (Yojson.Basic.from_string empty)
 
 (* in order of closest match to u1 to least close *)
-let u1_prefs = 
-  let u = Client.read_json State.u1 in
-  Client.update_prefs u [("q1", "0"); ("q2", "0"); ("q3", "0"); ("q4", "0")];
-  u
-let u2_prefs = 
-  let u = Client.read_json State.u2 in
-  Client.update_prefs u [("q1", "1"); ("q2", "1"); ("q3", "0"); ("q4", "1")];
-  u
-let u3_prefs = 
-  let u = Client.read_json State.u3 in
-  Client.update_prefs u [("q1", "3"); ("q2", "1"); ("q3", "1"); ("q4", "2")];
-  u
-let u4_prefs = 
-  let u = Client.read_json State.u4 in
-  Client.update_prefs u [("q1", "3"); ("q2", "1"); ("q3", "1"); ("q4", "3")];
-  u
+let u1_prefs =  Client.read_json State.pref_1
+
+let u2_prefs = Client.read_json State.pref_2
+
+let u3_prefs = Client.read_json State.pref_3
+
+let u4_prefs = Client.read_json State.pref_4
 
 let question_list_test 
     (name : string) 
@@ -73,6 +96,17 @@ let match_score_test
         ~printer: string_of_float
         ~cmp: float_close_enough)
 
+let compile_matches_test 
+    (name : string) 
+    (c: Client.t) 
+    (st: State.state)
+    (s: Survey.t)
+    (expected_output : (Client.uid*float) list) : test = 
+  name >:: (fun _ -> 
+      assert_equal expected_output 
+        (Survey.compile_matches c st (Survey.question_list s))
+        ~printer: (pp_list (fun x -> x) string_of_float)
+        ~cmp: list_close_enough)
 
 let survey_tests = [
   question_list_test "Empty survey returns empty list" empty_survey [];
@@ -103,6 +137,13 @@ let survey_tests = [
     (1. /. 3.);
   match_score_test "u1 u4 should be lowest" survey1
     (Client.get_preferences u1_prefs) (Client.get_preferences u4_prefs) 0.;
+
+  compile_matches_test "empty state should return empty list" u1_prefs 
+    State.empty_state survey1 [];
+  compile_matches_test "u1 should have u2 as a match" u1_prefs 
+    State.pref_state survey1 [("2", 7. /. 3.)];
+  compile_matches_test "u4 should have u2 and u3 as a match" u4_prefs 
+    State.pref_state survey1 [("2", 1. /. 3.); ("3", 1. /. 3.)]
 ]
 
 let suite = 

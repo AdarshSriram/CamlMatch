@@ -41,14 +41,14 @@ val get_notifs : t -> (uid*string) list
 
 (** [get_matches user] returns the list of matches of the [user]. Returns the 
     empty list if no matches are found *)
-val get_matches : t -> uid list 
+val get_matches : t -> (uid*float) list 
 
 (** [update_prefs user p] replaces the [user's] current preferences with [p] *)
 val update_prefs : t -> (string*string) list -> unit 
 
 (** [update_matches user match] adds [match] the [user's] match list. 
     If [match] is already in the [user's] match list, then nothing is done. *)
-val update_matches : t -> uid -> unit 
+val update_matches : t -> (uid*float) list -> unit 
 
 (** [update_notifs user m_id msg] adds the [msg] from [m_id] to [user's] 
     notfication list. *)
@@ -66,4 +66,3 @@ val to_json : t -> Yojson.Basic.t
 
 (** [read_json j] converts [j] into a user *)
 val read_json : Yojson.Basic.t -> t
-

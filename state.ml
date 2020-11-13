@@ -76,24 +76,23 @@ let rec find_user_by_name name = function
       else find_user_by_name name t
     end 
 
-(** [replace_user user u_list] replaces the [user] in [u_list] with its 
-    updated form, [user] *)
-let rec replace_user user u_list =
+let rec replace_user st user =
   let repl (x, y) = 
     if Client.get_uid user = x 
     then (Client.get_uid user, Client.to_json user) 
     else (x, y) 
   in 
-  List.map repl u_list 
+  let new_users = List.map repl (to_assoc st.user_list) in
+  {user_list = `Assoc new_users}
 
 let send_notification st user m_name msg = 
   let receiver = get_user_recs st |> find_user_by_name m_name in 
-  if not (List.mem (Client.get_uid receiver) (Client.get_matches user))
+  let user_matches = Client.get_matches user |> List.split |> fst in 
+  if not (List.mem (Client.get_uid receiver) user_matches)
   then raise (InvalidMatch)
   else begin 
     Client.update_notifs receiver m_name msg;
-    let new_ulst = replace_user receiver  (to_assoc st.user_list) in 
-    let new_state = { user_list = `Assoc new_ulst } in 
+    let new_state = replace_user st receiver in 
     store_users new_state
   end 
 
@@ -109,22 +108,16 @@ let read_notifs st user =
   in
   print_to_console (Client.get_notifs user)
 
-let u1 = Client.to_json (Client.make_user "user 1" "pass1" "1" )
-let u2 = Client.to_json (Client.make_user "user 2" "pass2" "2")
-let u3 = Client.make_user "user 3" "pass3" "3" |> Client.to_json
-let u4 = Client.make_user "user 4" "pass4" "4" |> Client.to_json
-let u5 = Client.make_user "user 5" "pass5" "5" |> Client.to_json
 
-let u6 = 
-  let user  = (Client.make_user "user 6" "pass6" "6" ) in 
-  Client.update_matches user "2";
-  Client.update_matches user "3";
-  Client.update_prefs user [("1", "2");("2", "1")]; user 
-
-let test_state = 
-  { 
-    user_list = `Assoc [("1", u1);("2", u2);("3", u3);("4", u4)];
-  }
+let print_matches st user = 
+  let rec print_helper = function
+    | [] -> print_newline ()
+    | (id, y) :: t -> begin
+        let match_name = get_user_by_id st id |> Client.get_name in 
+        print_endline (match_name); print_helper t
+      end
+  in 
+  print_helper (Client.get_matches user)
 
 let can_sign_up st name : bool =
   let creds = get_logins st in 
@@ -133,3 +126,57 @@ let can_sign_up st name : bool =
     | [] -> true 
     | (_, (a, _)) ::t ->  if a = name then false else check_creds t
   in check_creds creds
+
+(*FOR TESTING ONLY *)
+
+let testing_store_users st = 
+  st.user_list |> to_file "DummyUsers.json"; st
+
+let testing_add_user st uid user =
+  match st.user_list with 
+  | `Assoc x -> let users = `Assoc ((uid, user)::x) in 
+    testing_store_users { user_list = users}
+  | _ -> failwith "json error"
+
+
+let u1 = Client.to_json (Client.make_user "user 1" "pass1" "1") 
+let u2 = Client.to_json (Client.make_user "user 2" "pass2" "2")
+let u3 = Client.make_user "user 3" "pass3" "3" |> Client.to_json
+let u4 = Client.make_user "user 4" "pass4" "4" |> Client.to_json
+let u5 = Client.make_user "user 5" "pass5" "5" |> Client.to_json
+
+let u6 = 
+  let user  = (Client.make_user "user 6" "pass6" "6" ) in 
+  Client.update_matches user [("2", 0.543); ("3", 0.998)];
+  Client.update_prefs user [("1", "2");("2", "1")]; user 
+
+let test_state = 
+  { 
+    user_list = `Assoc [("1", u1);("2", u2);("3", u3);("4", u4)];
+  }
+
+let empty_state = 
+  { 
+    user_list = `Assoc [("1", u1);];
+  }
+
+let create_pref_user uname pword id prefs = 
+  let u = Client.make_user uname pword id in
+  Client.update_prefs u prefs; u
+
+let pref_1 = create_pref_user "p1" "" "1"  
+    [("q1", "0"); ("q2", "0"); ("q3", "0"); ("q4", "0")] |> Client.to_json
+
+let pref_2 = create_pref_user "p2" "" "2"
+    [("q1", "1"); ("q2", "1"); ("q3", "0"); ("q4", "1")] |> Client.to_json
+
+let pref_3 = create_pref_user "p3" "" "3" 
+    [("q1", "3"); ("q2", "1"); ("q3", "1"); ("q4", "2")] |> Client.to_json
+
+let pref_4 = create_pref_user "p4" "" "4" 
+    [("q1", "3"); ("q2", "1"); ("q3", "1"); ("q4", "3")] |> Client.to_json
+
+let pref_state = {
+  user_list = `Assoc [("1", pref_1);("2", pref_2);("3", pref_3);("4", pref_4)];
+}
+

@@ -138,28 +138,37 @@ let rec score_aux score p1 p2 survey =
 let match_score p1 p2 survey = 
   score_aux 0. p1 p2 survey
 
-let rec compile_helper state user acc ulst survey = 
+let rec compile_helper state user_prefs acc ulst survey = 
   match ulst with 
   | [] -> acc 
   | h :: t -> begin 
       let u = State.get_user_by_id state h in
       let match_prefs = Client.get_preferences u in
-      let new_acc = (h, match_score user match_prefs survey) :: acc in 
-      compile_helper state user new_acc t survey 
+      let new_acc = (h, match_score user_prefs match_prefs survey) :: acc in 
+      compile_helper state user_prefs new_acc t survey 
     end
 
-(* TODO *)
-let sort_match lst = 
-  lst
+let comp_scores (_, score1) (_, score2) = 
+  if score1 > score2 then -1
+  else if score1 < score2 then 1
+  else 0
 
-(* should go thru user list and call match_score on
-   user and each user. make sure match_score isnt called
-   on the same user twice. *)
+(** [find_above_mean lst] returns members of [lst] with a score greater than 
+    the mean score *)
+let find_above_mean lst = 
+  let add_score acc (_, score) = acc +. score in 
+  let mean = (List.fold_left add_score 0. lst) /. 
+             float_of_int (List.length lst) in 
+  List.filter (fun (_, score) -> score >= mean) lst  
+
 let compile_matches user state survey = 
   let users = State.get_users state in 
+  let other_users = List.filter (fun x -> x <> Client.get_uid user) users in
   let user_prefs = Client.get_preferences user in
-  let uns_lst = compile_helper state user_prefs [] users survey in 
-  sort_match uns_lst
+  let all_sim_scores = compile_helper state user_prefs [] other_users survey in
+  let match_list = find_above_mean all_sim_scores in  
+  List.sort comp_scores match_list
+
 
 let print_question s q =
   let q_list = question_list s in 

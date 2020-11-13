@@ -32,7 +32,7 @@ let get_pref_test
 let get_matches_test 
     (name : string)
     (t : Client.t) 
-    (expected_output : Client.uid list) : test = 
+    (expected_output : (Client.uid*float) list) : test = 
   name >:: (fun _ -> 
       assert_equal expected_output (Client.get_matches t))
 
@@ -62,6 +62,7 @@ let user_of_id_raises_test
 let u1 = Client.make_user "user 1" "pass1" "1" 
 let u2 = Client.make_user "user 2" "pass1" "2"
 let u3 = Client.make_user "user 3" "pass1" "3"
+let u4 = Client.make_user "user 4" "pass4" "4"
 
 let client_tests = [
   (* Testing make_user *)
@@ -77,9 +78,15 @@ let client_tests = [
     [("q1", "2"); ("q2", "1")];
 
   get_matches_test "Updated U3 matches is [u2]" 
-    (Client.update_matches u3 "2"; u3) ["2"];
-  get_matches_test "Adding u2 match again to U3 will result in [u2]" 
-    (Client.update_matches u3 "2"; u3) ["2"];
+    (Client.update_matches u3 [("2", 0.565)]; u3) ["2", 0.565];
+  get_matches_test "Two matches in U2 matches" 
+    (Client.update_matches u2 [("1", 0.565); ("4", 0.98)]; u2) 
+    [("1", 0.565); ("4", 0.98)];
+  get_matches_test "User 4 has no matches" 
+    (Client.update_matches u4 [("1", 0.565); ("2", 0.98)]; 
+     Client.update_matches u4 []; u4) 
+    [];
+
 
   get_notifs_test "U1 has no notifications" u1 [];
   get_notifs_test "U2 has one notification" 
