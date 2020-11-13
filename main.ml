@@ -46,7 +46,7 @@ let rec sign_up st survey =
     if not (State.can_sign_up st name) then raise State.UsernameTaken else
       let pwd = get_pwd () in
       let user = Client.make_user name pwd 
-          ( State.get_users st |> List.length |> string_of_int) in 
+          ( State.get_users st |> List.length |> string_of_int) in
       fill_prefs user (Survey.question_list survey) 
         (Client.get_preferences user) survey;
       let new_user_state = State.add_user st (Client.get_uid user) 
@@ -58,6 +58,28 @@ let rec sign_up st survey =
   | State.UsernameTaken -> print_endline "Username taken."; sign_up st survey
   | _ -> print_endline "Invalid entry"; sign_up st survey
 
+let rec print_notifs state = function 
+  | [] -> ()
+  | (uid, msg) :: t -> begin 
+      let sender = State.get_user_by_id state uid in 
+      let name = Client.get_name sender in 
+      print_endline (name ^ ":");
+      print_endline msg;
+      print_notifs state t
+    end
+
+let rec check_notifs user st = 
+  let notifs = Client.get_notifs user in 
+  print_endline "Would you like to read your notifications?";
+  print_endline "| Yes [0] | No [1] |";
+  try 
+    let ans = read_int () in 
+    if ans = 0 then print_notifs st notifs else ();
+    waiting_room user st 
+  with 
+  | _ -> print_endline "Invalid Entry"; check_notifs user st
+
+
 let rec log_in st =
   print_endline "Please enter your name";
   print_string "> ";
@@ -66,6 +88,7 @@ let rec log_in st =
     print_string "> ";
     let pass = read_line () in
     let user = State.validate_user st name pass in 
+    check_notifs user st;
     waiting_room user st
   with
   | State.InvalidUser -> 
