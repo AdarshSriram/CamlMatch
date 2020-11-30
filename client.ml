@@ -1,4 +1,5 @@
 open Yojson.Basic.Util
+open Hashtbl
 
 type uid = string 
 exception UserNotFound of uid
@@ -92,3 +93,5 @@ let read_json json =
     matches = matches;
     notifications = notifs;
   }
+
+let encrypt p = p |> Hashtbl.hash |> string_of_int
