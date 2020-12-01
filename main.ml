@@ -35,7 +35,7 @@ let rec get_pwd dummy =
   print_string "> ";
   try let pwd = read_line () in 
     if String.length pwd < 6 then failwith "Invalid pwd" else 
-      pwd
+      Client.encrypt pwd
   with 
   | _ -> print_endline "Invalid password"; get_pwd ()
 
@@ -99,7 +99,7 @@ let rec log_in st =
   try let name = read_line () in 
     print_endline "Please enter your password";
     print_string "> ";
-    let pass = read_line () in
+    let pass = Client.encrypt (read_line ()) in
     let user = State.validate_user st name pass in 
     check_notifs user st;
     waiting_room user st

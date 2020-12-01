@@ -66,3 +66,6 @@ val to_json : t -> Yojson.Basic.t
 
 (** [read_json j] converts [j] into a user *)
 val read_json : Yojson.Basic.t -> t
+
+(** [encrypt p] converts [p] to its encrypted form *)
+val encrypt : string -> string
