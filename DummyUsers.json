@@ -1,4 +1,12 @@
 {
+  "0": {
+    "user_id": "0",
+    "name": "user 0",
+    "password": "257709571",
+    "preferences": {},
+    "matches": {},
+    "notifications": {}
+  },
   "5": {
     "user_id": "5",
     "name": "user 5",
