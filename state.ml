@@ -112,9 +112,13 @@ let read_notifs st user =
 let print_matches st user = 
   let rec print_helper = function
     | [] -> print_newline ()
-    | (id, y) :: t -> begin
-        let match_name = get_user_by_id st id |> Client.get_name in 
-        print_endline (match_name); print_helper t
+    | (id, score) :: t -> begin
+        let match_name = get_user_by_id st id |> Client.get_name in
+        let rounded_score =  Float.round (score *. 100.) 
+                             |> int_of_float 
+                             |> string_of_int in  
+        print_endline (match_name ^ ":" ^"\t"  ^ rounded_score ^ "% similar"); 
+        print_helper t
       end
   in 
   print_helper (Client.get_matches user)

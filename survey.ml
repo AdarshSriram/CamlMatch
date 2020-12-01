@@ -136,7 +136,8 @@ let rec score_aux score p1 p2 survey =
 
 (* calculates match score of 2 users *)
 let match_score p1 p2 survey = 
-  score_aux 0. p1 p2 survey
+  let total = score_aux 0. p1 p2 survey in 
+  total /. (float_of_int (List.length p1))
 
 let rec compile_helper state user_prefs acc ulst survey = 
   match ulst with 
