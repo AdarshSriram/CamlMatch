@@ -63,6 +63,12 @@ let jsonify_assoc l =
 let jsonify_float_assoc lst =
   `Assoc (List.map (fun (id, score) -> (id, `Float score)) lst)
 
+let  jsonify_notifs notifs =
+  `List (List.map (fun (id, msg) -> `Assoc [
+      ("id", `String id);
+      ("msg", `String msg)
+    ]) notifs)
+
 let to_json user= 
   `Assoc [
     ("user_id", `String user.user_id);
@@ -70,7 +76,7 @@ let to_json user=
     ("password", `String user.pword);
     ("preferences", jsonify_assoc user.preferences);
     ("matches", jsonify_float_assoc user.matches);
-    ("notifications", jsonify_assoc user.notifications);
+    ("notifications", jsonify_notifs user.notifications);
   ] 
 
 let read_json json =
@@ -85,10 +91,10 @@ let read_json json =
                 List.map (fun x -> match x with 
                     |(uid, `Float fl) -> (uid, fl)
                     | _-> failwith "json error") in
-  let notifs = json |> member "notifications" |> to_assoc |> 
-               List.map (fun x -> match x with 
-                   | (m_id, `String msg) -> (m_id, msg) 
-                   | _ -> failwith "json error") in               
+  let notifs = json |> member "notifications" |> to_list |>
+               List.map (fun notifs -> match to_assoc notifs with 
+                   | [(_, id);(_, msg)] -> (to_string id, to_string msg)
+                   | _ -> failwith "json error" ) in               
   {
     user_id = id;
     name = name;

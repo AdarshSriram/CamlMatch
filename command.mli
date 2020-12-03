@@ -9,20 +9,20 @@
     player command.
 
     A [phrase] is not permitted to be the empty list. *)
-type phrase = string list
+type message = string 
 
 (** The type [command] represents a user command that is decomposed
     into a verb and possible an object phrase. *)
 type command =
-  | Chat of phrase
-  | View of phrase
+  | Send of (string*message)
+  | View 
   | Quit
-
-(** Raised when an empty command is parsed. *)
-exception Empty
 
 (** Raised when a malformed command is encountered. *)
 exception Malformed
+
+(* Raised when user sends message to username that doesn't exist *)
+exception NoUserFound
 
 (** [parse str] parses a user's input into a [command].
     The first word of [str] becomes the verb. The rest of the words,
@@ -39,4 +39,4 @@ exception Malformed
     or if the verb is "chat" or "view" and there is an empty object phrase.
 *)
 
-val parse : string -> command
+val parse : Client.t -> string -> State.state -> command

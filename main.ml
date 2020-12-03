@@ -1,7 +1,24 @@
 
 (** [prompt_command user] prompts a user command for a user not in chat. *)
-let rec prompt_command user =
-  failwith "Unimplemented"
+let rec send_notif st user  =
+  print_endline "Would you like to send a message to one of your matches?";
+  print_endline "| Yes [0] | No [1] |";
+  try 
+    match read_int () with 
+    | 1 -> st; 
+    | 0 -> print_endline "Enter user's username."; 
+      let uname = read_line () in
+      if State.can_send st uname user then 
+        begin
+          print_endline "Enter your message."; 
+          let msg = read_line () in
+          State.send_notification st user uname msg 
+        end 
+      else raise State.InvalidUser
+    | _ -> print_endline "Invalid answer"; send_notif st user 
+  with 
+  | State.InvalidUser -> print_endline "Invalid Username"; send_notif st user
+  | _ -> print_endline "Invalid"; send_notif st user 
 
 (** [waiting_room st] tells user to wait while they are matched to other users
     in state [st] *)
@@ -47,6 +64,8 @@ let calc_matches user st surv =
   let matched_state = State.store_users updated_state in 
   print_endline "Here are the matches we have found: ";
   State.print_matches matched_state user;
+  let sent_state = send_notif matched_state user in 
+  if sent_state = matched_state then () else print_endline "Message sent";
   waiting_room user matched_state
 
 (** [sign_up st] collects profile input to create a new user profile *)
@@ -64,7 +83,6 @@ let rec sign_up st survey =
       let new_user_state = State.add_user st (Client.get_uid user) 
           (Client.to_json user) 
       in 
-      print_endline "Please wait while we calculate your matches.";
       print_endline "Please wait while we find your matches.";
       calc_matches user new_user_state survey 
   with
@@ -83,14 +101,19 @@ let rec print_notifs state = function
 
 let rec check_notifs user st = 
   let notifs = Client.get_notifs user in 
-  print_endline "Would you like to read your notifications?";
-  print_endline "| Yes [0] | No [1] |";
-  try 
-    let ans = read_int () in 
-    if ans = 0 then print_notifs st notifs else ();
-    waiting_room user st 
-  with 
-  | _ -> print_endline "Invalid Entry"; check_notifs user st
+  if notifs <> [] then 
+    begin 
+      print_endline "Would you like to read your notifications?";
+      print_endline "| Yes [0] | No [1] |";
+      try 
+        match read_int () with 
+        | 0 -> print_notifs st notifs; waiting_room user st
+        | 1 -> waiting_room user st
+        | _ -> failwith ""
+      with 
+      | e -> print_endline "Invalid Entry"; raise e 
+    end
+  else waiting_room user st
 
 
 let rec log_in st =
@@ -102,12 +125,14 @@ let rec log_in st =
     let pass = Client.encrypt (read_line ()) in
     let user = State.validate_user st name pass in 
     check_notifs user st;
-    waiting_room user st
+    if send_notif st user = st then waiting_room user st 
+    else print_endline "\nMessage sent."; waiting_room user st
+
   with
   | State.InvalidUser -> 
     print_endline "This name and password combination was not found."; log_in st
-  | _ -> 
-    print_endline "Invalid input."; log_in st
+  | e -> 
+    print_endline "Invalid input."; raise e
 
 (** [execute_system dummy] starts a session for a user *)
 let rec execute_system dummy =
@@ -120,7 +145,7 @@ let rec execute_system dummy =
     else if start = 1 then log_in init_state 
     else failwith "Invalid entry"
   with
-  | _ -> print_endline "Invalid entry"; execute_system ()
+  | e -> print_endline "Invalid entry"; raise e (*execute_system () *)
 
 (** [main ()] prompts for the user to create a profile or log in, 
     then starts it. *)

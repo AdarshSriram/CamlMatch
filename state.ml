@@ -85,13 +85,13 @@ let rec replace_user st user =
   let new_users = List.map repl (to_assoc st.user_list) in
   {user_list = `Assoc new_users}
 
-let send_notification st user m_name msg = 
+let send_notification st user (m_name : string) msg = 
   let receiver = get_user_recs st |> find_user_by_name m_name in 
   let user_matches = Client.get_matches user |> List.split |> fst in 
   if not (List.mem (Client.get_uid receiver) user_matches)
   then raise (InvalidMatch)
   else begin 
-    Client.update_notifs receiver m_name msg;
+    Client.update_notifs receiver (Client.get_uid user) msg;
     let new_state = replace_user st receiver in 
     store_users new_state
   end 
@@ -129,6 +129,15 @@ let can_sign_up st name : bool =
     match credList with
     | [] -> true 
     | (_, (a, _)) ::t ->  if a = name then false else check_creds t
+  in check_creds creds
+
+let can_send st receiver user = 
+  let creds = get_logins st in 
+  let rec check_creds credList = 
+    match credList with
+    | [] -> false 
+    | (_, (a, _)) ::t ->  if a = receiver && a <> Client.get_name user
+      then true else check_creds t
   in check_creds creds
 
 (*FOR TESTING ONLY *)

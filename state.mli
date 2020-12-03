@@ -34,7 +34,13 @@ val get_user_data : string -> Yojson.Basic.t
 
 val print_users : state -> unit
 
+(** [can_sign_up state username] is a boolean, indicating whether a user with 
+    username [username] can sign up*)
 val can_sign_up : state -> string -> bool
+
+(** [can_send state uname user] is a boolean, indicating whether user [user] can
+    successfully send a message to user with username [uname] *)
+val can_send : state -> string -> Client.t -> bool
 
 (** [validate_user st name pword] returns the user if the [name, pword] 
     combination is valid in state [st]. 
