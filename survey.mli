@@ -63,10 +63,7 @@ val print_question : t -> qid -> unit
 
 (* FOR TESTING ONLY *)
 val q_list : q list 
-val q1_ans : a list 
-val q2_ans : a list 
 val q3_ans : a list 
-val q4_ans : a list 
 val q4_rec : q
 val q1_type : qtype
 val q2_type : qtype

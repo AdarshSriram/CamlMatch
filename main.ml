@@ -74,7 +74,7 @@ let rec sign_up st survey =
   print_string  "> ";
   try let name = read_line () in
     if String.length name < 1 then failwith "Invalid Entry" else
-    if not (State.can_sign_up st name) then raise State.UsernameTaken else
+    if not (State.user_can_sign_up st name) then raise State.UsernameTaken else
       let pwd = get_pwd () in
       let user = Client.make_user name pwd 
           ( State.get_users st |> List.length |> string_of_int) in 
@@ -139,7 +139,7 @@ let rec execute_system dummy =
   print_string  "> ";
   try
     let start = read_int () in
-    let init_state = State.get_state "Users.json" in 
+    let init_state = State.get_state "Users.json" "Admins.json" in 
     let survey = Yojson.Basic.from_file "survey1.json" |> Survey.from_json in 
     if start = 0 then sign_up init_state survey
     else if start = 1 then log_in init_state 

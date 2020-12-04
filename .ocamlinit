@@ -6,3 +6,4 @@
 #load "state.cmo";;
 #load "client.cmo";;
 #load "survey.cmo";;
+#load "admin.cmo";;

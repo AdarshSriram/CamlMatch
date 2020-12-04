@@ -38,19 +38,36 @@ let list_close_enough l1 l2 =
 let survey1 = Survey.from_json (Yojson.Basic.from_file "survey1.json")
 
 let empty = {|{"questions": [
-  ]
-  }|}
+   ]
+   }|}
 
 let empty_survey = Survey.from_json (Yojson.Basic.from_string empty)
 
 (* in order of closest match to u1 to least close *)
-let u1_prefs =  Client.read_json State.pref_1
+(* let u1_prefs =  Client.read_json State.pref_1
 
-let u2_prefs = Client.read_json State.pref_2
+   let u2_prefs = Client.read_json State.pref_2
 
-let u3_prefs = Client.read_json State.pref_3
+   let u3_prefs = Client.read_json State.pref_3
 
-let u4_prefs = Client.read_json State.pref_4
+   let u4_prefs = Client.read_json State.pref_4 *)
+
+let empty_state = State.init_state ()
+
+let pref_state = State.get_state "test_jsons/PrefUsers.json" 
+    "test_jsons/DummyAdmins.json"
+
+let rec get_user_by_id id = function 
+  | [] -> failwith "No such user"
+  | h :: t -> if Client.get_uid h = id then h else get_user_by_id id t
+
+let user_recs = State.get_user_recs pref_state
+
+let u1_prefs = get_user_by_id "1" user_recs
+let u2_prefs = get_user_by_id "2" user_recs
+let u3_prefs = get_user_by_id "3" user_recs
+let u4_prefs = get_user_by_id "4" user_recs
+
 
 let question_list_test 
     (name : string) 
@@ -131,19 +148,19 @@ let survey_tests = [
 
   match_score_test "u1 u2 should be highest match" survey1
     (Client.get_preferences u1_prefs) (Client.get_preferences u2_prefs) 
-    (7. /. 3.);
+    ((7. /. 3.)/. 4.);
   match_score_test "u1 u3 should be less than u2" survey1
     (Client.get_preferences u1_prefs) (Client.get_preferences u3_prefs) 
-    (1. /. 3.);
+    ((1. /. 3.)/. 4.);
   match_score_test "u1 u4 should be lowest" survey1
     (Client.get_preferences u1_prefs) (Client.get_preferences u4_prefs) 0.;
 
   compile_matches_test "empty state should return empty list" u1_prefs 
-    State.empty_state survey1 [];
+    empty_state survey1 [];
   compile_matches_test "u1 should have u2 as a match" u1_prefs 
-    State.pref_state survey1 [("2", 7. /. 3.)];
+    pref_state survey1 [("2", (7. /. 3.) /. 4.)];
   compile_matches_test "u4 should have u2 and u3 as a match" u4_prefs 
-    State.pref_state survey1 [("2", 1. /. 3.); ("3", 1. /. 3.)]
+    pref_state survey1 [("2", (1. /. 3.) /. 4.); ("3", (1. /. 3.) /. 4.)]
 ]
 
 let suite = 

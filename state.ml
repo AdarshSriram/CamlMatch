@@ -6,58 +6,124 @@ exception InvalidMatch
 exception UsernameTaken
 
 type state = {
-  user_list: Yojson.Basic.t;
+  user_list : Yojson.Basic.t;
+  admin_list : Yojson.Basic.t;
 }
 
 let init_state () = 
   {
     user_list = `Assoc [];
+    admin_list = `Assoc [];
   }
 
-let get_user_data file = 
-  from_file file 
+let get_data_from_file file = 
+  from_file file  
 
-let get_state file = 
-  let dt = 
-    try get_user_data file with 
+let get_state ufile afile = 
+  let udt = 
+    try get_data_from_file ufile with 
     | _ -> `Null 
   in 
-  match dt with 
-  | `Null -> init_state ()
-  | `Assoc x -> { user_list = `Assoc x}
+  let adt = 
+    try get_data_from_file afile with 
+    | _ -> `Null 
+  in 
+  match (udt, adt) with 
+  | (`Null, `Null) -> init_state ()
+  | (`Null, `Assoc x) -> {user_list = `Assoc []; admin_list = `Assoc x}
+  | (`Assoc x, `Null) -> {user_list = `Assoc x; admin_list = `Assoc []}
+  | (`Assoc x, `Assoc y) -> {user_list = `Assoc x; admin_list = `Assoc y}
   | _ -> failwith "Invalid file"
 
 let get_users st = 
   st.user_list |> to_assoc |> List.map (fun (id, _) -> id) 
 
+let get_admins st = 
+  st.admin_list |> to_assoc |> List.map (fun (id, _) -> id) 
+
 let store_users st = 
   st.user_list |> to_file "Users.json"; st
 
+let store_admins st = 
+  st.admin_list |> to_file "Admins.json"; st
+
 let add_user st uid user =
+  let admins = st.admin_list in 
   match st.user_list with 
-  | `Assoc x -> let users = `Assoc ((uid, user)::x) in 
-    store_users { user_list = users}
+  | `Assoc x -> begin 
+      let users = `Assoc ((uid, user) :: x) in 
+      store_users {user_list = users; admin_list = admins}
+    end 
+  | _ -> failwith "json error"
+
+let add_admin st aid admin =
+  let users = st.user_list in 
+  match st.admin_list with 
+  | `Assoc x -> begin 
+      let admins = `Assoc ((aid, admin) :: x) in 
+      store_admins {user_list = users; admin_list = admins}
+    end 
   | _ -> failwith "json error"
 
 let get_user_by_id st id =
   st.user_list |> to_assoc |> List.assoc id |> Client.read_json
 
-let print_users st =
-  st.user_list |> to_string |> print_string
+let get_admin_by_id st id =
+  st.admin_list |> to_assoc |> List.assoc id |> Admin.read_json
 
-let get_logins st = 
+let get_user_logins st = 
   let uid_list = get_users st in 
   let partial_get_user = get_user_by_id st in 
   let user_list = List.map partial_get_user uid_list in 
   List.map (fun u -> (Client.get_uid u, Client.get_login u)) user_list 
 
+let user_can_sign_up st name : bool =
+  let creds = get_user_logins st in 
+  let rec check_creds credList = 
+    match credList with
+    | [] -> true 
+    | (_, (a, _)) ::t ->  if a = name then false else check_creds t
+  in check_creds creds
+
+let get_admin_logins st = 
+  let aid_list = get_admins st in 
+  let partial_get_admin = get_admin_by_id st in 
+  let admin_list = List.map partial_get_admin aid_list in 
+  List.map (fun a -> (Admin.get_aid a, Admin.get_login a)) admin_list 
+
+let admin_can_sign_up st name : bool =
+  let creds = get_admin_logins st in 
+  let rec check_creds cred_list = 
+    match cred_list with
+    | [] -> true 
+    | (_, (a, _)) ::t ->  if a = name then false else check_creds t
+  in check_creds creds
+
 let validate_user st n p = 
-  let cred_list = get_logins st in 
+  let cred_list = get_user_logins st in 
   let rec match_creds lst = 
     match lst with 
     | [] -> raise (InvalidUser)
     | (x, (name, pword)) :: t -> begin 
         if (name, pword) = (n, p) then get_user_by_id st x 
+        else match_creds t
+      end
+  in
+  match_creds cred_list
+
+let get_admin_logins st = 
+  let aid_list = get_admins st in 
+  let partial_get_admin = get_admin_by_id st in 
+  let admin_list = List.map partial_get_admin aid_list in 
+  List.map (fun a -> (Admin.get_aid a, Admin.get_login a)) admin_list
+
+let validate_admin st n p = 
+  let cred_list = get_admin_logins st in 
+  let rec match_creds lst = 
+    match lst with 
+    | [] -> raise (InvalidUser)
+    | (x, (name, pword)) :: t -> begin 
+        if (name, pword) = (n, p) then get_admin_by_id st x 
         else match_creds t
       end
   in
@@ -83,7 +149,7 @@ let rec replace_user st user =
     else (x, y) 
   in 
   let new_users = List.map repl (to_assoc st.user_list) in
-  {user_list = `Assoc new_users}
+  {st with user_list = `Assoc new_users}
 
 let send_notification st user (m_name : string) msg = 
   let receiver = get_user_recs st |> find_user_by_name m_name in 
@@ -123,16 +189,8 @@ let print_matches st user =
   in 
   print_helper (Client.get_matches user)
 
-let can_sign_up st name : bool =
-  let creds = get_logins st in 
-  let rec check_creds credList = 
-    match credList with
-    | [] -> true 
-    | (_, (a, _)) ::t ->  if a = name then false else check_creds t
-  in check_creds creds
-
 let can_send st receiver user = 
-  let creds = get_logins st in 
+  let creds = get_user_logins st in 
   let rec check_creds credList = 
     match credList with
     | [] -> false 
@@ -140,56 +198,22 @@ let can_send st receiver user =
       then true else check_creds t
   in check_creds creds
 
-(*FOR TESTING ONLY *)
 
-let testing_store_users st = 
-  st.user_list |> to_file "DummyUsers.json"; st
-
-let testing_add_user st uid user =
+(* FOR TESTING ONLY *)
+let test_add_user st uid user =
+  let admins = st.admin_list in 
   match st.user_list with 
-  | `Assoc x -> let users = `Assoc ((uid, user)::x) in 
-    testing_store_users { user_list = users}
+  | `Assoc x -> begin 
+      let users = `Assoc ((uid, user) :: x) in 
+      {user_list = users; admin_list = admins}
+    end 
   | _ -> failwith "json error"
 
-
-let u1 = Client.to_json (Client.make_user "user 1" "pass1" "1") 
-let u2 = Client.to_json (Client.make_user "user 2" "pass2" "2")
-let u3 = Client.make_user "user 3" "pass3" "3" |> Client.to_json
-let u4 = Client.make_user "user 4" "pass4" "4" |> Client.to_json
-let u5 = Client.make_user "user 5" "pass5" "5" |> Client.to_json
-
-let u6 = 
-  let user  = (Client.make_user "user 6" "pass6" "6" ) in 
-  Client.update_matches user [("2", 0.543); ("3", 0.998)];
-  Client.update_prefs user [("1", "2");("2", "1")]; user 
-
-let test_state = 
-  { 
-    user_list = `Assoc [("1", u1);("2", u2);("3", u3);("4", u4)];
-  }
-
-let empty_state = 
-  { 
-    user_list = `Assoc [("1", u1);];
-  }
-
-let create_pref_user uname pword id prefs = 
-  let u = Client.make_user uname pword id in
-  Client.update_prefs u prefs; u
-
-let pref_1 = create_pref_user "p1" "" "1"  
-    [("q1", "0"); ("q2", "0"); ("q3", "0"); ("q4", "0")] |> Client.to_json
-
-let pref_2 = create_pref_user "p2" "" "2"
-    [("q1", "1"); ("q2", "1"); ("q3", "0"); ("q4", "1")] |> Client.to_json
-
-let pref_3 = create_pref_user "p3" "" "3" 
-    [("q1", "3"); ("q2", "1"); ("q3", "1"); ("q4", "2")] |> Client.to_json
-
-let pref_4 = create_pref_user "p4" "" "4" 
-    [("q1", "3"); ("q2", "1"); ("q3", "1"); ("q4", "3")] |> Client.to_json
-
-let pref_state = {
-  user_list = `Assoc [("1", pref_1);("2", pref_2);("3", pref_3);("4", pref_4)];
-}
-
+let test_add_admin st aid admin =
+  let users = st.user_list in 
+  match st.admin_list with 
+  | `Assoc x -> begin 
+      let admins = `Assoc ((aid, admin) :: x) in 
+      {user_list = users; admin_list = admins}
+    end 
+  | _ -> failwith "json error"

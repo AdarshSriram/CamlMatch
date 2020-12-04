@@ -87,7 +87,6 @@ let client_tests = [
      Client.update_matches u4 []; u4) 
     [];
 
-
   get_notifs_test "U1 has no notifications" u1 [];
   get_notifs_test "U2 has one notification" 
     (Client.update_notifs u2 "1" "hello"; u2) [("1","hello")];
@@ -96,13 +95,10 @@ let client_tests = [
      Client.update_notifs u3 "1" "goodbye"; u3) 
     [("1", "goodbye"); ("4","bye")];
 
-
   user_of_id_test "User of id 2 is u2" "2" [u1; u2; u3] u2;
   user_of_id_raises_test "UserNotFound raised with searching for id 4" 
     "4" [u1; u2; u3];
-
 ]
-
 let suite = 
   "test suite for Client module" >::: List.flatten [
     client_tests;
