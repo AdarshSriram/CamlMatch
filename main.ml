@@ -68,16 +68,18 @@ let calc_matches user st surv =
   if sent_state = matched_state then () else print_endline "Message sent";
   waiting_room user matched_state
 
-(** [sign_up st] collects profile input to create a new user profile *)
-let rec sign_up st survey =
+let rec user_sign_up st survey = 
   print_endline "Please enter your name to begin the questionaire.";
   print_string  "> ";
   try let name = read_line () in
-    if String.length name < 1 then failwith "Invalid Entry" else
-    if not (State.user_can_sign_up st name) then raise State.UsernameTaken else
+    if String.length name < 1 
+    then failwith "Name too short" 
+    else
+    if not (State.user_can_sign_up st name) then raise State.UsernameTaken 
+    else
       let pwd = get_pwd () in
       let user = Client.make_user name pwd 
-          ( State.get_users st |> List.length |> string_of_int) in 
+          (State.get_users st |> List.length |> string_of_int) in 
       fill_prefs user (Survey.question_list survey) 
         (Client.get_preferences user) survey;
       let new_user_state = State.add_user st (Client.get_uid user) 
@@ -86,8 +88,42 @@ let rec sign_up st survey =
       print_endline "Please wait while we find your matches.";
       calc_matches user new_user_state survey 
   with
-  | State.UsernameTaken -> print_endline "Username taken."; sign_up st survey
-  | _ -> print_endline "An error has occured"; sign_up st survey
+  | State.UsernameTaken -> 
+    print_endline "Username taken."; 
+    user_sign_up st survey
+  | _ -> print_endline "An error has occured"; user_sign_up st survey
+
+let rec admin_sign_up st = 
+  print_endline "Please enter a name.";
+  print_string "> ";
+  try let name = read_line () in 
+    if String.length name < 1 
+    then failwith "Name too short"
+    else
+    if not (State.admin_can_sign_up st name) then raise State.UsernameTaken 
+    else
+      let pwd = get_pwd () in 
+      let aid = (State.get_admins st |> List.length |> string_of_int) in
+      let admin = Admin.make_admin aid name pwd in 
+      let new_state = State.add_admin st aid (Admin.to_json admin) in 
+      waiting_room admin new_state 
+  with
+  | State.UsernameTaken -> 
+    print_endline "Username taken."; 
+    admin_sign_up st
+  | _ -> print_endline "An error has occured"; admin_sign_up st 
+
+(** [sign_up st] collects profile input to create a new user profile *)
+let rec sign_up st survey =
+  print_endline "Create Admin account?";
+  print_endline "| Yes [0] | No [1] |";
+  print_string "> ";
+  match read_int () with 
+  | 0 -> admin_sign_up st 
+  | 1 -> user_sign_up st survey 
+  | _ -> begin 
+      print_endline "Invalid Entry"; sign_up st survey
+    end
 
 let rec print_notifs state = function 
   | [] -> ()
@@ -111,10 +147,27 @@ let rec check_notifs user st =
         | 1 -> waiting_room user st
         | _ -> failwith ""
       with 
-      | e -> print_endline "Invalid Entry"; raise e 
+      | e -> print_endline "Invalid Entry"; check_notifs user st
     end
   else waiting_room user st
 
+let user_logged_in user st = 
+  check_notifs user st;
+  if send_notif st user = st then waiting_room user st 
+  else print_endline "\nMessage sent."; waiting_room user st
+
+let admin_logged_in adm st = 
+  waiting_room adm st
+
+let val_admin_or_user st nm pass = 
+  try 
+    let user = State.validate_user st nm pass in
+    user_logged_in user st
+  with 
+  | State.InvalidUser -> begin
+      let admin = State.validate_admin st nm pass in 
+      admin_logged_in admin st
+    end
 
 let rec log_in st =
   print_endline "Please enter your name";
@@ -123,11 +176,7 @@ let rec log_in st =
     print_endline "Please enter your password";
     print_string "> ";
     let pass = Client.encrypt (read_line ()) in
-    let user = State.validate_user st name pass in 
-    check_notifs user st;
-    if send_notif st user = st then waiting_room user st 
-    else print_endline "\nMessage sent."; waiting_room user st
-
+    val_admin_or_user st name pass 
   with
   | State.InvalidUser -> 
     print_endline "This name and password combination was not found."; log_in st
