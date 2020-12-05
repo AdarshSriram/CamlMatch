@@ -57,6 +57,10 @@ val can_send : state -> string -> Client.t -> bool
     has the name [name]. Returns false otherwise *)
 val admin_can_sign_up : state -> string -> bool
 
+(** [can_send state uname user] is a boolean, indicating whether user [user] can
+    successfully send a message to user with username [uname] *)
+val can_send : state -> string -> Client.t -> bool
+
 (** [validate_user st name pword] returns the user if the [name, pword] 
     combination is valid in state [st]. 
     Raises: [InvalidUser] if the combination is not valid *)

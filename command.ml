@@ -10,6 +10,12 @@ exception NoUserFound
 
 let p el = el <> ""
 
+let is_admin user =
+  try 
+    user <> (Client.to_json user |> Client.read_json)
+  with 
+    _ -> true
+
 (* [valid_rest command] checks if the phrase of [command]
    is valid. *)
 let valid_rest st command user =
