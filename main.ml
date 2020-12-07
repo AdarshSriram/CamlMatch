@@ -23,7 +23,7 @@ let rec send_notif st user  =
 (** [waiting_room st] tells user to wait while they are matched to other users
     in state [st] *)
 let waiting_room user st = 
-  ()
+  State.draw_graph st
 
 (** [fill_prefs user q_list new_prefs] prompts [user] to fill out questionnaire
     [q_list] and updates prefs to [new_prefs] *)

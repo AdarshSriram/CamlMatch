@@ -1,4 +1,6 @@
 B _build
 PKG ounit2
 PKG yojson
+PKG ocamlgraph
+PKG graphics
 PKG ANSITerminal

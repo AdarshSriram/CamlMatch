@@ -1,5 +1,6 @@
 open Yojson.Basic.Util
 open Yojson.Basic
+open Graph
 
 exception InvalidUser
 exception InvalidMatch
@@ -226,3 +227,83 @@ let test_add_admin st aid admin =
       {user_list = users; admin_list = admins}
     end 
   | _ -> failwith "json error"
+
+module Int = struct
+  type t = int
+  let hash = Hashtbl.hash 
+  let equal = (=)
+  let compare =   Stdlib.compare
+end
+
+module IntInt = struct 
+  type t = float
+  let hash = Hashtbl.hash 
+  let equal = (=)
+  let compare =   Stdlib.compare
+  let default = 0.
+end
+
+module Str =
+struct
+  type t = string
+  let hash = Hashtbl.hash 
+  let equal = (=)
+  let compare =   Stdlib.compare
+end
+
+module G = Imperative.Graph.ConcreteLabeled(Str)(IntInt)  
+
+module D = Graph.Traverse.Dfs(G)
+
+module Components = Graph.Components.Make(G)
+
+let make_graph st = 
+  let g = G.create () in 
+  let name_of_id id st = id |> get_user_by_id st |> Client.get_name in
+  let uname_list st = to_assoc st.user_list |> List.map (fun (id, _) -> name_of_id id st ) in
+  uname_list st |>
+  List.iter ( fun name ->
+      let match_names = 
+        get_user_recs st |> find_user_by_name name
+        |> Client.get_matches  
+        |> List.map (fun (uid, score )-> name_of_id uid st, score) in
+      let add_vx u_name = 
+        let v = G.V.create u_name in G.add_vertex g v;v in
+      let node = G.V.create name in G.add_vertex g node;
+      List.iter (fun (usr, score) -> let vx = (add_vx usr) in 
+                  G.E.create node score vx |> G.add_edge_e g) match_names;
+    );
+  g
+
+
+(*let make_graph st = 
+  let g = G.create () in 
+  let id_list = to_assoc st.user_list |> List.map (fun (id, _) -> id ) in 
+  id_list |>
+  List.iter ( fun id ->
+      let matches =  get_user_by_id st id |> Client.get_matches |> List.map (fun (uid,_ )-> int_of_string uid ) in
+      let add_vx id =  let v = G.V.create id in G.add_vertex g v;v in
+      let node = G.V.create (int_of_string id) in G.add_vertex g node;
+      List.iter (fun usr -> let  vx = (add_vx usr) in G.add_edge g node vx; 
+                  G.E.create node 1 vx |> G.add_edge_e g ) matches;);
+  g*)
+
+module Dot = Graph.Graphviz.Dot(
+  struct
+    include G
+    let default_edge_attributes _ = []
+    let get_subgraph _ = None
+    let vertex_attributes _ = [`Shape `Circle] 
+    let vertex_name v = G.V.label v
+    let default_vertex_attributes _ = []
+    let graph_attributes _ = []
+
+    let nice_score e =  
+      let flt = string_of_float (100. *. e) in 
+      String.sub flt 0 (min 4 (String.length flt))  ^ "%"
+
+    let edge_attributes e = [`Label (G.E.label e |> nice_score); `Color 4711; `Arrowhead `None ]
+  end
+  )
+
+let draw_graph st = let file = open_out_bin "graph.dot" in Dot.output_graph file (make_graph st) 

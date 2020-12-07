@@ -102,3 +102,12 @@ val test_add_user : state -> Client.uid -> Yojson.Basic.t -> state
 
 val test_add_admin : state -> Admin.aid -> Yojson.Basic.t -> state
 
+<<<<<<< HEAD
+=======
+val get_user_recs : state -> Client.t list 
+
+val draw_graph : state -> unit
+
+
+
+>>>>>>> Added Usergraph feature
