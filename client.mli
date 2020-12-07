@@ -43,6 +43,10 @@ val get_notifs : t -> (uid*string) list
     empty list if no matches are found *)
 val get_matches : t -> (uid*float) list 
 
+(** [get_logins user] returns the number of times [user] has logged in to the 
+    system *)
+val get_logins : t -> int 
+
 (** [update_prefs user p] replaces the [user's] current preferences with [p] *)
 val update_prefs : t -> (string*string) list -> unit 
 
@@ -56,6 +60,10 @@ val update_notifs : t -> uid -> string -> unit
 
 (** [clear_notifs user] removes all of [user's] notifications *)
 val clear_notifs : t -> unit 
+
+(** [incr_logins user] increments the number of times [user] has logged in
+    by 1 *)
+val incr_logins : t -> unit
 
 (** [user_of_uid id users] returns the user from [users] whose user id is [id].
     Raises: UserNotFound of [id] if [id] is not in [users] *)

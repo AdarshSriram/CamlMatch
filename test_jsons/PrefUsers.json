@@ -3,6 +3,7 @@
     "user_id": "1",
     "name": "user 1",
     "password": "876021969",
+    "logins": 0,
     "preferences": {
       "q1": "0",
       "q2": "0",
@@ -16,6 +17,7 @@
     "user_id": "2",
     "name": "user 2",
     "password": "562198583",
+    "logins": 0,
     "preferences": {
       "q1": "1",
       "q2": "1",
@@ -29,6 +31,7 @@
     "user_id": "3",
     "name": "user 3",
     "password": "502269420",
+    "logins": 0,
     "preferences": {
       "q1": "3",
       "q2": "1",
@@ -42,6 +45,7 @@
     "user_id": "4",
     "name": "user 4",
     "password": "589487134",
+    "logins": 0,
     "preferences": {
       "q1": "3",
       "q2": "1",

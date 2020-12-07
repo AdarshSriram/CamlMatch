@@ -198,8 +198,17 @@ let can_send st receiver user =
       then true else check_creds t
   in check_creds creds
 
+let print_user_stats st uid = 
+  let user = get_user_by_id st uid in 
+  let answer_survey = Client.get_preferences user <> [] in 
+  let num_matches = List.length (Client.get_matches user) in 
+  print_endline ("Name: " ^ Client.get_name user);
+  print_endline ("No. of Logins: " ^ string_of_int (Client.get_logins user));
+  print_endline ("Survey Questions Answered?: " ^ string_of_bool answer_survey);
+  print_string ("Number of Matches: " ^ string_of_int num_matches)
 
-(* FOR TESTING ONLY *)
+
+(* FOR TESTING ONLY - REMOVE DUPLICATE CODE WITH HELPER FUNCTION *)
 let test_add_user st uid user =
   let admins = st.admin_list in 
   match st.user_list with 

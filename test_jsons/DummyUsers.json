@@ -3,6 +3,7 @@
     "user_id": "0",
     "name": "user 0",
     "password": "257709571",
+    "logins": 0,
     "preferences": {},
     "matches": {},
     "notifications": []
@@ -11,6 +12,7 @@
     "user_id": "1",
     "name": "user 1",
     "password": "876021969",
+    "logins": 0,
     "preferences": {},
     "matches": {},
     "notifications": []
@@ -19,6 +21,7 @@
     "user_id": "2",
     "name": "user 2",
     "password": "562198583",
+    "logins": 0,
     "preferences": {},
     "matches": {},
     "notifications": []
@@ -27,6 +30,7 @@
     "user_id": "3",
     "name": "user 3",
     "password": "502269420",
+    "logins": 0,
     "preferences": {},
     "matches": {},
     "notifications": []
@@ -35,6 +39,7 @@
     "user_id": "4",
     "name": "user 4",
     "password": "589487134",
+    "logins": 0,
     "preferences": {},
     "matches": {},
     "notifications": []

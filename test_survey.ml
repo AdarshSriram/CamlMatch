@@ -43,15 +43,6 @@ let empty = {|{"questions": [
 
 let empty_survey = Survey.from_json (Yojson.Basic.from_string empty)
 
-(* in order of closest match to u1 to least close *)
-(* let u1_prefs =  Client.read_json State.pref_1
-
-   let u2_prefs = Client.read_json State.pref_2
-
-   let u3_prefs = Client.read_json State.pref_3
-
-   let u4_prefs = Client.read_json State.pref_4 *)
-
 let empty_state = State.init_state ()
 
 let pref_state = State.get_state "test_jsons/PrefUsers.json" 
@@ -125,6 +116,17 @@ let compile_matches_test
         ~printer: (pp_list (fun x -> x) string_of_float)
         ~cmp: list_close_enough)
 
+let get_q_stat_test 
+    (name : string) 
+    (st: State.state)
+    (surv : Survey.t)
+    (q: Survey.qid)
+    (expected_output : (Survey.aid * int) list) : test = 
+  name >:: (fun _ -> 
+      assert_equal expected_output 
+        (Survey.get_q_stat st surv q)
+        ~printer: (pp_list (fun x -> x) string_of_int))
+
 let survey_tests = [
   question_list_test "Empty survey returns empty list" empty_survey [];
   question_list_test "Survey 1 returns q list" survey1 Survey.q_list;
@@ -160,7 +162,17 @@ let survey_tests = [
   compile_matches_test "u1 should have u2 as a match" u1_prefs 
     pref_state survey1 [("2", (7. /. 3.) /. 4.)];
   compile_matches_test "u4 should have u2 and u3 as a match" u4_prefs 
-    pref_state survey1 [("2", (1. /. 3.) /. 4.); ("3", (1. /. 3.) /. 4.)]
+    pref_state survey1 [("2", (1. /. 3.) /. 4.); ("3", (1. /. 3.) /. 4.)];
+
+  get_q_stat_test "Pref state, q1 stats" pref_state survey1 "q1" 
+    [("I hate them!", 1); ("I do not like them", 1); ("They're useful", 0); 
+     ("I love them!", 2)];
+  get_q_stat_test "Pref state, q4 stats" pref_state survey1 "q4" 
+    [("0-2 hours", 1); ("3-5 hours", 1); ("6-10 hours", 1); 
+     ("11+ hours", 1)];
+  get_q_stat_test "Pref state, q2 stats" pref_state survey1 "q2" 
+    [("Fall", 1); ("Spring", 3); ("Winter", 0); 
+     ("Summer", 0)];
 ]
 
 let suite = 

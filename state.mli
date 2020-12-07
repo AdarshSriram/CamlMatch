@@ -87,12 +87,18 @@ val read_notifs : state -> Client.t -> unit
 
 (** [print_matches st user] pretty-prints [user's] matches to the console in 
     the sytem's state [state] *)
-val print_matches : state -> Client.t -> unit 
+val print_matches : state -> Client.t -> unit  
+
+(** [get_user_recs st] returns the users in state [st] *)
+val get_user_recs : state -> Client.t list 
+
+(** [print_user_stats st uid] prints information about the user with uid [uid]. 
+    Information includes username, number of times logged in, preferences, and 
+    number of matches *)
+val print_user_stats : state -> Client.uid -> unit
 
 (** For testing *)
 val test_add_user : state -> Client.uid -> Yojson.Basic.t -> state
 
 val test_add_admin : state -> Admin.aid -> Yojson.Basic.t -> state
-
-val get_user_recs : state -> Client.t list 
 

@@ -10,6 +10,7 @@ type online_user = {
   user_id : uid;
   name : string;
   pword : string;
+  mutable logins : int;
   mutable preferences : (string*string) list;
   mutable matches : (uid*float) list;
   mutable notifications : (uid*string) list;
@@ -21,6 +22,7 @@ let make_user n p id = {
   user_id = id;
   name = n;
   pword = p;
+  logins = 0;
   preferences = [];
   matches = [];
   notifications = [];
@@ -38,6 +40,8 @@ let get_matches user = user.matches
 
 let get_notifs user = user.notifications
 
+let get_logins user = user.logins
+
 let update_prefs user p_list = 
   user.preferences <- p_list
 
@@ -49,6 +53,9 @@ let update_notifs user m_id str =
 
 let clear_notifs user = 
   user.notifications <- []
+
+let incr_logins user = 
+  user.logins <- user.logins + 1
 
 let rec user_of_uid id = function 
   | [] -> raise (UserNotFound id)
@@ -74,6 +81,7 @@ let to_json user=
     ("user_id", `String user.user_id);
     ("name", `String user.name);
     ("password", `String user.pword);
+    ("logins", `Int user.logins);
     ("preferences", jsonify_assoc user.preferences);
     ("matches", jsonify_float_assoc user.matches);
     ("notifications", jsonify_notifs user.notifications);
@@ -83,6 +91,7 @@ let read_json json =
   let id = json |> member "user_id" |> to_string in 
   let name = json |> member "name" |> to_string in 
   let pword = json |> member "password" |> to_string in 
+  let logs = json |> member "logins" |> to_int in 
   let prefs = json |> member "preferences" |> to_assoc |> 
               List.map (fun x -> match x with 
                   | (q, `String ans) -> (q, ans) 
@@ -99,6 +108,7 @@ let read_json json =
     user_id = id;
     name = name;
     pword = pword;
+    logins = logs;
     preferences = prefs;
     matches = matches;
     notifications = notifs;

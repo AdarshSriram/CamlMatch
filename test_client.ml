@@ -43,6 +43,13 @@ let get_notifs_test
   name >:: (fun _ -> 
       assert_equal expected_output (Client.get_notifs t))
 
+let get_logins_test 
+    (name : string)
+    (t : Client.t) 
+    (expected_output : int) : test = 
+  name >:: (fun _ -> 
+      assert_equal expected_output (Client.get_logins t))
+
 let user_of_id_test
     (name : string)
     (id : Client.uid) 
@@ -71,7 +78,7 @@ let client_tests = [
   get_login_test "Creditials is user 1 pass1" u1 ("user 1", "pass1");
   get_pref_test "Preferences of user 1 is []" u1 [];
   get_matches_test "User 1 has no matches" u1 [];
-  (*get_chats_test "User 1 has no chats" u1 None;*)
+  get_logins_test "User 1 has 0 logins" u1 0;
 
   get_pref_test "Updated U1 preferences are [3;1]" 
     (Client.update_prefs u2 [("q1", "2"); ("q2", "1")]; u2) 
@@ -98,7 +105,12 @@ let client_tests = [
   user_of_id_test "User of id 2 is u2" "2" [u1; u2; u3] u2;
   user_of_id_raises_test "UserNotFound raised with searching for id 4" 
     "4" [u1; u2; u3];
+
+  get_logins_test "U2 has logged in once" (Client.incr_logins u2; u2) 1;
+  get_logins_test "U3 has logged in twice" 
+    (Client.incr_logins u3; Client.incr_logins u3; u3) 2;
 ]
+
 let suite = 
   "test suite for Client module" >::: List.flatten [
     client_tests;
