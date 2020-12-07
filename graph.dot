@@ -1,29 +1,9 @@
 digraph G {
-  u3 [shape=circle, ];
-  u1 [shape=circle, ];
-  Adarsh [shape=circle, ];
-  u2 [shape=circle, ];
-  Adarsh2 [shape=circle, ];
-  Adarsh 4 [shape=circle, ];
-  Adarsh3 [shape=circle, ];
-  Adarsh5 [shape=circle, ];
+  gries [shape=circle, ];
+  gries2 [shape=circle, ];
+  gries3 [shape=circle, ];
   
   
-  u3 -> Adarsh [arrowhead=none, color="#001267", label="50.%", ];
-  u3 -> Adarsh5 [arrowhead=none, color="#001267", label="16.6%", ];
-  u3 -> u2 [arrowhead=none, color="#001267", label="58.3%", ];
-  u1 -> Adarsh 4 [arrowhead=none, color="#001267", label="58.3%", ];
-  u2 -> Adarsh [arrowhead=none, color="#001267", label="91.6%", ];
-  u2 -> Adarsh 4 [arrowhead=none, color="#001267", label="41.6%", ];
-  u2 -> Adarsh2 [arrowhead=none, color="#001267", label="50.%", ];
-  u2 -> Adarsh3 [arrowhead=none, color="#001267", label="25.%", ];
-  u2 -> Adarsh5 [arrowhead=none, color="#001267", label="33.3%", ];
-  u2 -> u1 [arrowhead=none, color="#001267", label="266.%", ];
-  Adarsh2 -> Adarsh [arrowhead=none, color="#001267", label="41.6%", ];
-  Adarsh 4 -> Adarsh [arrowhead=none, color="#001267", label="33.3%", ];
-  Adarsh3 -> Adarsh [arrowhead=none, color="#001267", label="16.6%", ];
-  Adarsh3 -> Adarsh2 [arrowhead=none, color="#001267", label="25.%", ];
-  Adarsh5 -> Adarsh [arrowhead=none, color="#001267", label="25.%", ];
-  Adarsh5 -> Adarsh2 [arrowhead=none, color="#001267", label="33.3%", ];
+  gries2 -> gries [arrowhead=none, color="#001267", label="33.3%", ];
   
   }

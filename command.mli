@@ -40,3 +40,5 @@ exception NoUserFound
 *)
 
 val parse : Client.t -> string -> State.state -> command
+
+val is_admin : Client.t -> bool

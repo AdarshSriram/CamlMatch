@@ -271,8 +271,9 @@ let make_graph st =
       let add_vx u_name = 
         let v = G.V.create u_name in G.add_vertex g v;v in
       let node = G.V.create name in G.add_vertex g node;
-      List.iter (fun (usr, score) -> let vx = (add_vx usr) in 
-                  G.E.create node score vx |> G.add_edge_e g) match_names;
+      let add_edges (usr, score) = let vx = (add_vx usr) in 
+        G.E.create node score vx |> G.add_edge_e g in
+      List.iter (fun (usr, score) -> add_edges (usr, score)) match_names;
     );
   g
 (*let make_graph st = 
