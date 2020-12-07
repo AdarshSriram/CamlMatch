@@ -228,30 +228,30 @@ let test_add_admin st aid admin =
     end 
   | _ -> failwith "json error"
 
-module Int = struct
-  type t = int
-  let hash = Hashtbl.hash 
-  let equal = (=)
-  let compare =   Stdlib.compare
-end
-
-module IntInt = struct 
+module Flt = struct 
   type t = float
+
   let hash = Hashtbl.hash 
+
   let equal = (=)
+
   let compare =   Stdlib.compare
-  let default = 0.
+
+  let default = 0.0
 end
 
 module Str =
 struct
   type t = string
+
   let hash = Hashtbl.hash 
+
   let equal = (=)
+
   let compare =   Stdlib.compare
 end
 
-module G = Imperative.Graph.ConcreteLabeled(Str)(IntInt)  
+module G = Imperative.Graph.ConcreteLabeled(Str)(Flt)  
 
 module D = Graph.Traverse.Dfs(G)
 
@@ -260,7 +260,8 @@ module Components = Graph.Components.Make(G)
 let make_graph st = 
   let g = G.create () in 
   let name_of_id id st = id |> get_user_by_id st |> Client.get_name in
-  let uname_list st = to_assoc st.user_list |> List.map (fun (id, _) -> name_of_id id st ) in
+  let uname_list st = to_assoc st.user_list 
+                      |> List.map (fun (id, _) -> name_of_id id st ) in
   uname_list st |>
   List.iter ( fun name ->
       let match_names = 
@@ -274,8 +275,6 @@ let make_graph st =
                   G.E.create node score vx |> G.add_edge_e g) match_names;
     );
   g
-
-
 (*let make_graph st = 
   let g = G.create () in 
   let id_list = to_assoc st.user_list |> List.map (fun (id, _) -> id ) in 
@@ -292,18 +291,26 @@ module Dot = Graph.Graphviz.Dot(
   struct
     include G
     let default_edge_attributes _ = []
+
     let get_subgraph _ = None
+
     let vertex_attributes _ = [`Shape `Circle] 
+
     let vertex_name v = G.V.label v
+
     let default_vertex_attributes _ = []
+
     let graph_attributes _ = []
 
     let nice_score e =  
       let flt = string_of_float (100. *. e) in 
       String.sub flt 0 (min 4 (String.length flt))  ^ "%"
 
-    let edge_attributes e = [`Label (G.E.label e |> nice_score); `Color 4711; `Arrowhead `None ]
+    let edge_attributes e = 
+      [`Label (G.E.label e |> nice_score); `Color 4711; `Arrowhead `None ]
   end
   )
 
-let draw_graph st = let file = open_out_bin "graph.dot" in Dot.output_graph file (make_graph st) 
+let draw_graph st = 
+  let file = open_out_bin "graph.dot" in 
+  Dot.output_graph file (make_graph st) 
