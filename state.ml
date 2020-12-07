@@ -253,8 +253,6 @@ end
 
 module G = Imperative.Graph.ConcreteLabeled(Str)(Flt)  
 
-module D = Graph.Traverse.Dfs(G)
-
 module Components = Graph.Components.Make(G)
 
 let make_graph st = 
@@ -275,7 +273,8 @@ let make_graph st =
         G.E.create node score vx |> G.add_edge_e g in
       List.iter (fun (usr, score) -> add_edges (usr, score)) match_names;
     );
-  g
+  let scc =  g |> Components.scc_list |> List.map (fun lst -> List.map (fun v -> G.V.label v) lst) in 
+  g, scc
 (*let make_graph st = 
   let g = G.create () in 
   let id_list = to_assoc st.user_list |> List.map (fun (id, _) -> id ) in 
@@ -312,6 +311,36 @@ module Dot = Graph.Graphviz.Dot(
   end
   )
 
+module W = struct
+  type edge = G.E.t
+  type t = float
+  let weight x = G.E.label x
+  let zero = 0.
+  let add = (+.)
+  let sub = (-.)
+  let compare = compare
+end
+
+module Dij = Path.Dijkstra(G)(W)
+
+let shortest_path st u1 u2 =
+  let g = fst (make_graph st) in 
+  try 
+    let v1 = ref (G.V.create "") in 
+    let v2 = ref (G.V.create "") in
+    G.iter_vertex (fun v -> 
+        if G.V.label v = u1 then v1 := v else
+        if G.V.label v = u2 then v2 := v else
+          ()) g;  
+    if G.V.label !v1 <> "" && G.V.label !v1 <> "" then 
+      let lst,_ = Dij.shortest_path g !v1 !v2
+      in List.length lst
+    else -1
+  with _ -> -1
+
 let draw_graph st = 
-  let file = open_out_bin "graph.dot" in 
-  Dot.output_graph file (make_graph st) 
+  let file = open_out_bin "graph.dot" in
+  Dot.output_graph file (make_graph st |> fst) 
+
+let connected_components st = 
+  (make_graph st |> snd) 
