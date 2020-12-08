@@ -92,6 +92,15 @@ val print_matches : state -> Client.t -> unit
 (** [get_user_recs st] returns the users in state [st] *)
 val get_user_recs : state -> Client.t list 
 
+val draw_graph : state -> unit
+
+val connected_components : state -> (string list) list
+
+(** [shortest_path state u1 u2] is the number of friends apart users with 
+    usenames u1 and u2 are. Returns -1 if u1 and u2 are not part of the same 
+    connected component or either one is not a valid username *)
+val shortest_path : state -> string -> string -> int
+
 (** [print_user_stats st uid] prints information about the user with uid [uid]. 
     Information includes username, number of times logged in, preferences, and 
     number of matches *)
@@ -101,4 +110,3 @@ val print_user_stats : state -> Client.uid -> unit
 val test_add_user : state -> Client.uid -> Yojson.Basic.t -> state
 
 val test_add_admin : state -> Admin.aid -> Yojson.Basic.t -> state
-

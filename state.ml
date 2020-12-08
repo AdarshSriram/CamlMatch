@@ -1,5 +1,6 @@
 open Yojson.Basic.Util
 open Yojson.Basic
+open Graph
 
 exception InvalidUser
 exception InvalidMatch
@@ -226,3 +227,112 @@ let test_add_admin st aid admin =
       {user_list = users; admin_list = admins}
     end 
   | _ -> failwith "json error"
+
+module Flt = struct 
+  type t = float
+
+  let hash = Hashtbl.hash 
+
+  let equal = (=)
+
+  let compare =   Stdlib.compare
+
+  let default = 0.0
+end
+
+module Str =
+struct
+  type t = string
+
+  let hash = Hashtbl.hash 
+
+  let equal = (=)
+
+  let compare =   Stdlib.compare
+end
+
+module G = Imperative.Graph.ConcreteLabeled(Str)(Flt)  
+
+module Components = Graph.Components.Make(G)
+
+let make_graph st = 
+  let g = G.create () in 
+  let name_of_id id st = id |> get_user_by_id st |> Client.get_name in
+  let uname_list st = to_assoc st.user_list 
+                      |> List.map (fun (id, _) -> name_of_id id st ) in
+  let iter_helper name = 
+    let match_names = 
+      get_user_recs st |> find_user_by_name name
+      |> Client.get_matches  
+      |> List.map (fun (uid, score )-> name_of_id uid st, score) in
+    let add_vx u_name = 
+      let v = G.V.create u_name in G.add_vertex g v;v in
+    let node = G.V.create name in G.add_vertex g node;
+    let add_edges (usr, score) = let vx = (add_vx usr) in 
+      G.E.create node score vx |> G.add_edge_e g in
+    List.iter (fun (usr, score) -> add_edges (usr, score)) match_names  in 
+  uname_list st |> List.iter iter_helper;
+  let map_scc lst = 
+    List.map (fun v -> G.V.label v) lst in 
+  let scc =  g |> Components.scc_list |> List.map map_scc in 
+  g, scc
+
+module Dot = Graph.Graphviz.Dot(
+  struct
+    include G
+    let default_edge_attributes _ = []
+
+    let get_subgraph _ = None
+
+    let vertex_attributes _ = [`Shape `Circle] 
+
+    let vertex_name v = G.V.label v
+
+    let default_vertex_attributes _ = []
+
+    let graph_attributes _ = []
+
+    let nice_score e =  
+      let flt = string_of_float (100. *. e) in 
+      String.sub flt 0 (min 4 (String.length flt))  ^ "%"
+
+    let edge_attributes e = 
+      [`Label (G.E.label e |> nice_score); `Color 4711; `Arrowhead `None ]
+  end
+  )
+
+module W = struct
+  type edge = G.E.t
+  type t = float
+  let weight x = G.E.label x
+  let zero = 0.
+  let add = (+.)
+  let sub = (-.)
+  let compare = compare
+end
+
+module Dij = Path.Dijkstra(G)(W)
+
+let shortest_path st u1 u2 =
+  let g = fst (make_graph st) in 
+  try 
+    let v1 = ref (G.V.create "") in 
+    let v2 = ref (G.V.create "") in
+    G.iter_vertex (fun v -> 
+        if G.V.label v = u1 then v1 := v else
+        if G.V.label v = u2 then v2 := v else
+          ()) g;  
+    if G.V.label !v1 <> "" && G.V.label !v1 <> "" then 
+      let lst,_ = Dij.shortest_path g !v1 !v2
+      in List.length lst
+    else -1
+  with _ -> -1
+
+let draw_graph st = 
+  let _ = Sys.command "./clear_graph.sh" in
+  let file = open_out_bin "graph.dot" in
+  Dot.output_graph file (make_graph st |> fst); 
+  let _ = Sys.command "./make_graph.sh" in ()
+
+let connected_components st = 
+  (make_graph st |> snd) 

@@ -15,6 +15,8 @@ clean:
 	ocamlbuild -clean
 	rm -rf final_project.zip
 
+graph:
+	dot graph.dot -Tpdf -o Usergraph.pdf
 
 test:
 	$(OCAMLBUILD) -tag 'debug' 'test_state.byte' && ./'test_state.byte'

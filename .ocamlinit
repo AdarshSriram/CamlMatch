@@ -1,6 +1,7 @@
 #require "ounit2";;
 #require "ANSITerminal";;
 #require "yojson";;
+#require "ocamlgraph"
 #directory "_build";;
 #load "main.cmo";;
 #load "state.cmo";;
