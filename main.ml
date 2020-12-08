@@ -20,15 +20,14 @@ let rec send_notif st user  =
   | State.InvalidUser -> print_endline "Invalid Username"; send_notif st user
   | _ -> print_endline "Invalid"; send_notif st user 
 
+let generate_graph st =
+  State.draw_graph st; 
+  print_endline "User graph generated !"
+
 (** [waiting_room st] tells user to wait while they are matched to other users
     in state [st] *)
 let waiting_room user st = 
-  ()
-
-let generate_graph st =
-  State.draw_graph st; 
-  let _ = Sys.command "dot graph.dot -Tpdf -o Usergraph.pdf" in
-  print_endline "User graph generated !"
+  generate_graph st
 
 (** [fill_prefs user q_list new_prefs] prompts [user] to fill out questionnaire
     [q_list] and updates prefs to [new_prefs] *)

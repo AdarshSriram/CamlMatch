@@ -260,32 +260,22 @@ let make_graph st =
   let name_of_id id st = id |> get_user_by_id st |> Client.get_name in
   let uname_list st = to_assoc st.user_list 
                       |> List.map (fun (id, _) -> name_of_id id st ) in
-  uname_list st |>
-  List.iter ( fun name ->
-      let match_names = 
-        get_user_recs st |> find_user_by_name name
-        |> Client.get_matches  
-        |> List.map (fun (uid, score )-> name_of_id uid st, score) in
-      let add_vx u_name = 
-        let v = G.V.create u_name in G.add_vertex g v;v in
-      let node = G.V.create name in G.add_vertex g node;
-      let add_edges (usr, score) = let vx = (add_vx usr) in 
-        G.E.create node score vx |> G.add_edge_e g in
-      List.iter (fun (usr, score) -> add_edges (usr, score)) match_names;
-    );
-  let scc =  g |> Components.scc_list |> List.map (fun lst -> List.map (fun v -> G.V.label v) lst) in 
+  let iter_helper name = 
+    let match_names = 
+      get_user_recs st |> find_user_by_name name
+      |> Client.get_matches  
+      |> List.map (fun (uid, score )-> name_of_id uid st, score) in
+    let add_vx u_name = 
+      let v = G.V.create u_name in G.add_vertex g v;v in
+    let node = G.V.create name in G.add_vertex g node;
+    let add_edges (usr, score) = let vx = (add_vx usr) in 
+      G.E.create node score vx |> G.add_edge_e g in
+    List.iter (fun (usr, score) -> add_edges (usr, score)) match_names  in 
+  uname_list st |> List.iter iter_helper;
+  let map_scc lst = 
+    List.map (fun v -> G.V.label v) lst in 
+  let scc =  g |> Components.scc_list |> List.map map_scc in 
   g, scc
-(*let make_graph st = 
-  let g = G.create () in 
-  let id_list = to_assoc st.user_list |> List.map (fun (id, _) -> id ) in 
-  id_list |>
-  List.iter ( fun id ->
-      let matches =  get_user_by_id st id |> Client.get_matches |> List.map (fun (uid,_ )-> int_of_string uid ) in
-      let add_vx id =  let v = G.V.create id in G.add_vertex g v;v in
-      let node = G.V.create (int_of_string id) in G.add_vertex g node;
-      List.iter (fun usr -> let  vx = (add_vx usr) in G.add_edge g node vx; 
-                  G.E.create node 1 vx |> G.add_edge_e g ) matches;);
-  g*)
 
 module Dot = Graph.Graphviz.Dot(
   struct
@@ -339,8 +329,10 @@ let shortest_path st u1 u2 =
   with _ -> -1
 
 let draw_graph st = 
+  let _ = Sys.command "./clear_graph.sh" in
   let file = open_out_bin "graph.dot" in
-  Dot.output_graph file (make_graph st |> fst) 
+  Dot.output_graph file (make_graph st |> fst); 
+  let _ = Sys.command "./make_graph.sh" in ()
 
 let connected_components st = 
   (make_graph st |> snd) 
