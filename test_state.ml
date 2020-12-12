@@ -20,48 +20,96 @@ let pp_list pp_elt lst =
     in loop 0 "" lst
   in "[" ^ pp_elts lst ^ "]"
 
-let get_users_test name store res = 
+let get_users_test 
+    (name : string) 
+    (store : state) 
+    (res : Client.uid list) = 
   name >:: (fun _ -> 
       assert_equal res (get_users store) ~printer: (pp_list pp_string) )
 
-let add_user_test name store uid user res = 
+let add_user_test 
+    (name : string) 
+    (store : state) 
+    (uid : Client.uid) 
+    (user : Yojson.Basic.t) 
+    (res : state) = 
   name >:: (fun _ -> 
       assert_equal (get_users res) (get_users(test_add_user store uid user)))
 
-let get_u_by_id_test name store id res = 
+let get_u_by_id_test 
+    (name : string) 
+    (store : state) 
+    (id : Client.uid)  
+    (res : Client.t) = 
   name >:: (fun _ -> 
       assert_equal res (get_user_by_id store id))
 
-let validate_user_exn_test name st uname pass = 
+let validate_user_exn_test 
+    (name : string) 
+    (st : state) 
+    (uname : string) 
+    (pass : string) = 
   name >:: (fun _ -> 
       assert_raises (State.InvalidUser) 
         (fun () -> validate_user st name pass))
 
-let user_can_sign_up_test name st uname res = 
+let user_can_sign_up_test 
+    (name : string) 
+    (st : state) 
+    (uname : string) 
+    (res : bool) = 
   name >:: (fun _ -> 
       assert_equal res (user_can_sign_up st uname))
 
-let get_admins_test name st res = 
+let get_admins_test 
+    (name : string) 
+    (st : state) 
+    (res : Admin.aid list) = 
   name >:: (fun _ -> 
       assert_equal res (get_admins st) ~printer: (pp_list pp_string) )
 
-let add_admin_test name st aid admin res = 
+let add_admin_test 
+    (name : string) 
+    (st : state) 
+    (aid : Admin.aid) 
+    (admin : Yojson.Basic.t) 
+    (res : state) = 
   name >:: (fun _ -> 
       assert_equal (get_admins res) (get_admins (test_add_admin st aid admin)))
 
-let get_a_by_id_test name st id res = 
+let get_a_by_id_test 
+    (name : string) 
+    (st : state) 
+    (id : Admin.aid) 
+    (res : Admin.t) = 
   name >:: (fun _ -> 
       assert_equal res (get_admin_by_id st id))
 
-let validate_admin_exn_test name st aname pass = 
+let validate_admin_exn_test 
+    (name : string) 
+    (st : state) 
+    (aname : string) 
+    (pass : string) = 
   name >:: (fun _ -> 
       assert_raises (State.InvalidUser) 
         (fun () -> validate_user st aname pass))
 
-let admin_can_sign_up_test name st aname res = 
+let admin_can_sign_up_test 
+    (name : string) 
+    (st : state) 
+    (aname : string) 
+    (res : bool) = 
   name >:: (fun _ -> 
       assert_equal res (admin_can_sign_up st aname))
 
+let hist_values_test 
+    (name : string) 
+    (st : state) 
+    (qid : string) 
+    (ulist : string list) 
+    (expected : int list) = 
+  name >:: (fun _ -> 
+      assert_equal expected (test_histogram_values st qid ulist))
 
 let test_state = State.get_state "test_jsons/DummyUsers.json" 
     "test_jsons/DummyAdmins.json"
@@ -80,6 +128,9 @@ let add_admin_state = State.get_state "test_jsons/DummyUser.json"
 
 let a0 = Admin.make_admin "0" "admin 0" "257709571"
 
+let pref_state = get_state "test_jsons/PrefUsers.json" 
+    "test_jsons/DummyAdmins.json"
+let pref_users = get_users pref_state
 
 let state_tests = [
   get_users_test "Get users from DummyUsers" test_state 
@@ -125,6 +176,11 @@ let state_tests = [
   admin_can_sign_up_test "admin 4 can sign up" test_state "admin 4" true;
   admin_can_sign_up_test "admin 1 cannot sign up" test_state "admin 0" false;
 
+  (* testing histogram *)
+  hist_values_test "q1 with pref_state" pref_state "q1" pref_users [1;1;0;2];
+  hist_values_test "q2 with pref_state" pref_state "q2" pref_users [1;3];
+  hist_values_test "q3 with pref_state" pref_state "q3" pref_users [2;2];
+  hist_values_test "q4 with pref_state" pref_state "q4" pref_users [1;1;1;1];
 ]
 
 let suite = 

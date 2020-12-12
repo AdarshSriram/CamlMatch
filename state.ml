@@ -396,3 +396,6 @@ let draw_graph st =
 
 let connected_components st = 
   (make_graph st |> snd) 
+
+let test_histogram_values st qid ulist = 
+  get_prefs st qid [] ulist
