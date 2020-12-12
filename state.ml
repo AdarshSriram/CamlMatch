@@ -108,8 +108,7 @@ let validate_user st n p =
     | (x, (name, pword)) :: t -> begin 
         if (name, pword) = (n, p) then get_user_by_id st x 
         else match_creds t
-      end
-  in
+      end in
   match_creds cred_list
 
 let get_admin_logins st = 
@@ -126,8 +125,7 @@ let validate_admin st n p =
     | (x, (name, pword)) :: t -> begin 
         if (name, pword) = (n, p) then get_admin_by_id st x 
         else match_creds t
-      end
-  in
+      end in
   match_creds cred_list
 
 (** [get_user_recs st] returns the list of user records *)
@@ -147,8 +145,7 @@ let rec replace_user st user =
   let repl (x, y) = 
     if Client.get_uid user = x 
     then (Client.get_uid user, Client.to_json user) 
-    else (x, y) 
-  in 
+    else (x, y) in 
   let new_users = List.map repl (to_assoc st.user_list) in
   {st with user_list = `Assoc new_users}
 
@@ -171,10 +168,8 @@ let read_notifs st user =
         let match_name = get_user_by_id st x |> Client.get_name in 
         print_endline (match_name ^ ":" ^"\t"  ^ y);
         print_to_console t
-      end 
-  in
+      end in
   print_to_console (Client.get_notifs user)
-
 
 let print_matches st user = 
   let rec print_helper = function
@@ -186,8 +181,7 @@ let print_matches st user =
                              |> string_of_int in  
         print_endline (match_name ^ ":" ^"\t"  ^ rounded_score ^ "% similar"); 
         print_helper t
-      end
-  in 
+      end in 
   print_helper (Client.get_matches user)
 
 let can_send st receiver user = 
@@ -196,8 +190,8 @@ let can_send st receiver user =
     match credList with
     | [] -> false 
     | (_, (a, _)) ::t ->  if a = receiver && a <> Client.get_name user
-      then true else check_creds t
-  in check_creds creds
+      then true else check_creds t in
+  check_creds creds
 
 let print_user_stats st uid = 
   let user = get_user_by_id st uid in 
@@ -208,6 +202,72 @@ let print_user_stats st uid =
   print_endline ("Survey Questions Answered?: " ^ string_of_bool answer_survey);
   print_string ("Number of Matches: " ^ string_of_int num_matches)
 
+let rec add_ans ans acc = 
+  match ans, acc with 
+  | 0, h :: t -> (h + 1) :: t
+  | n, h :: t -> h :: add_ans (n-1) t 
+  | n, [] -> add_ans n (0 :: acc)
+
+let count_ans qid prefs acc = 
+  try
+    let ans = int_of_string (List.assoc qid prefs) in 
+    add_ans ans acc
+  with 
+  | Not_found -> failwith "Question not found."
+
+let rec get_prefs st qid acc = function 
+  | [] -> acc
+  | h :: t -> begin 
+      let user_pref = h |> get_user_by_id st |> Client.get_preferences in
+      let new_acc = count_ans qid user_pref acc in 
+      get_prefs st qid new_acc t
+    end
+
+let rec add_bar lst acc = 
+  match lst with 
+  | [] -> 
+    acc 
+  | h :: t -> begin
+      if h = 0 then add_bar t acc ^ "__ "
+      else add_bar t acc ^ "   "
+    end
+
+let rec add_qnum n str c = 
+  if c > n then str
+  else
+    let str = str ^ (string_of_int c) ^ "  " in 
+    add_qnum n str (c+1)
+
+let display_line lst count = 
+  if count = 0 then 
+    let len = List.length lst in
+    let str = "1 |" ^ String.make (1 + 3 * len) '_' in 
+    add_qnum len (str ^ "\n    ") 1
+  else
+    let str = (string_of_int (count+1)) ^ " | " in 
+    add_bar lst str
+
+let rec print_ansi lst = function 
+  | -1 -> () 
+  | n -> begin 
+      ANSITerminal.(print_string [cyan; Bold] (display_line lst n));
+      print_newline ();
+      print_ansi (List.map (fun x -> x-1) lst) (n-1)
+    end
+
+let display_histogram st qid = 
+  let users = get_users st in
+  let hist = get_prefs st qid [] users in 
+  let user_len = List.length users in 
+  let rev_hist = List.map (fun x -> user_len - x) hist in 
+  print_newline ();
+  ANSITerminal.(print_string [Bold;Underlined] ("Question: " ^ qid));
+  print_newline ();
+  print_newline ();
+  print_ansi rev_hist user_len
+
+let question_histogram qid st admin = 
+  display_histogram st qid
 
 (* FOR TESTING ONLY - REMOVE DUPLICATE CODE WITH HELPER FUNCTION *)
 let test_add_user st uid user =

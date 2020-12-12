@@ -2,7 +2,10 @@ type message = string
 
 type command =
   | Send of (string*message)
-  | View 
+  | Quit
+
+type acommand = 
+  | Hist of string
   | Quit
 
 exception Malformed
@@ -10,15 +13,9 @@ exception NoUserFound
 
 let p el = el <> ""
 
-let is_admin user =
-  try 
-    user <> (Client.to_json user |> Client.read_json)
-  with 
-    _ -> true
-
-(* [valid_rest command] checks if the phrase of [command]
+(* [valid_send command] checks if the phrase of [command]
    is valid. *)
-let valid_rest st command user =
+let valid_send st command user =
   match command with 
   | h::[] -> raise Malformed
   | h::t -> if (State.can_send st (h) user) 
@@ -28,16 +25,39 @@ let valid_rest st command user =
 
 let command verb rest st user = 
   let len = List.length rest in
-  if verb = "send" && len > 0 then valid_rest st rest user else 
-  if verb = "view" && len = 0 then View else
-  if verb = "quit" && len = 0 then Quit else
-    raise Malformed
+  if verb = "send" && len > 0 then valid_send st rest user 
+  else if verb = "quit" && len = 0 then Quit 
+  else raise Malformed
 
-let parse user str st =
+let parse_user user str st =
   let lst = 
     String.split_on_char ' ' str
-    |> List.filter p 
-  in
+    |> List.filter p in
   match lst with
   | h :: t -> command (String.lowercase_ascii h) t st user
+  | [] -> raise Malformed
+
+let valid_hist st command admin = 
+  match command with 
+  | [] -> raise Malformed
+  | h :: t -> begin
+      try
+        State.question_histogram h st admin;
+        Hist h
+      with
+      | Failure f -> raise Malformed
+    end
+
+let acommand verb rest st admin = 
+  let len = List.length rest in 
+  if verb = "hist" && len > 0 then valid_hist st rest admin else
+  if verb = "quit" && len = 0 then Quit else 
+    raise Malformed
+
+let parse_admin admin str st = 
+  let lst = 
+    String.split_on_char ' ' str
+    |> List.filter p in
+  match lst with
+  | h :: t -> acommand (String.lowercase_ascii h) t st admin
   | [] -> raise Malformed

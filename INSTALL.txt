@@ -1,7 +1,8 @@
 To run our system:
 1. Unzip
-2. Run command: [make build]
-3. Run command: [make match] to interact with the system
+2. In the terminal, run [opam install ocamlgraph]
+3. Run command: [make build]
+4. Run command: [make match] to interact with the system
 
 You can now create an account, fill out the survey, and get matches. 
 The sign in feature is also implemented 

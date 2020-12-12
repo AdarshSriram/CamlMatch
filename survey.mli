@@ -60,11 +60,6 @@ val compile_matches : Client.t -> State.state -> q list ->
     Requires: [id] is a valid question id in survey [s]*)
 val print_question : t -> qid -> unit
 
-(** [get_q_stat st qid] returns the numbers of times each answer for question 
-    [qid] was answered by users in state [st] *)
-val get_q_stat : State.state -> t -> qid -> (aid * int) list
-
-
 (* FOR TESTING ONLY *)
 val q_list : q list 
 val q3_ans : a list 

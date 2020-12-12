@@ -184,48 +184,6 @@ let print_question s q =
       end
   in ans quest.ans
 
-let incr_count elt lst = 
-  let old_count = List.assoc elt lst in 
-  let rem_lst = List.remove_assoc elt lst in 
-  (elt, old_count + 1) :: rem_lst
-
-let rec count_answers acc = function 
-  | [] -> acc 
-  | h :: t -> begin 
-      if List.mem_assoc h acc then count_answers (incr_count h acc) t 
-      else count_answers ((h, 1) :: acc) t 
-    end 
-
-let get_ans_of_aid surv q (aid, count) = 
-  let answers = answer_list surv q in 
-  let rec find_astr = function 
-    | [] -> failwith "Answer ID not found"
-    | {a_id = a; a_str = s} :: t -> if a = aid then (s, count) else find_astr t
-  in find_astr answers
-
-let fill_list surv q acc lst = 
-  let answers = answer_list surv q in 
-  let rec fill_aux lst = function 
-    | [] -> lst 
-    | {a_id = id; a_str = _} :: t -> begin 
-        if List.mem_assoc id lst then fill_aux lst t 
-        else fill_aux ((id, 0) :: lst) t
-      end 
-  in fill_aux lst answers
-
-let comp_stat (id1, count1) (id2, count2) = 
-  if id1 < id2 then (-1)
-  else if id1 > id2 then 1
-  else 0
-
-let get_q_stat st surv q = 
-  let users = State.get_user_recs st in 
-  let user_prefs = List.map (fun u -> Client.get_preferences u) users in 
-  let answers = List.map (fun p -> List.assoc q p) user_prefs in 
-  let partial_aid_list = count_answers [] answers in 
-  let full_list = fill_list surv q [] partial_aid_list in 
-  let sorted_list = List.sort comp_stat full_list in 
-  List.map (get_ans_of_aid surv q) sorted_list
 
 (* For Testing ONLY : *)
 let q1_ans0 = {

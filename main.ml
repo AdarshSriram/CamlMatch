@@ -26,8 +26,37 @@ let generate_graph st =
 
 (** [waiting_room st] tells user to wait while they are matched to other users
     in state [st] *)
-let waiting_room user st = 
-  generate_graph st
+let rec waiting_room user st = 
+  print_newline ();
+  print_endline "Enter a command. Type [help] to see the list of 
+  available commands.";
+  print_string "> ";
+  let comm = read_line () in
+  try
+    match Command.parse_user user comm st with 
+    | Send user -> failwith "Unimplemented send command"
+    | Quit -> ()
+  with 
+  | Command.Malformed -> begin 
+      print_endline "\nCommand not recognized.";
+      waiting_room user st
+    end
+
+let rec admin_room admin st = 
+  print_newline ();
+  print_endline "Enter a command. Type [help] to see the list of 
+  available commands.";
+  print_string "> ";
+  let comm = read_line () in
+  try
+    match Command.parse_admin admin comm st with 
+    | Hist q -> admin_room admin st
+    | Quit -> ()
+  with 
+  | _ -> begin 
+      print_endline "Command not recognized.";
+      admin_room admin st
+    end
 
 (** [fill_prefs user q_list new_prefs] prompts [user] to fill out questionnaire
     [q_list] and updates prefs to [new_prefs] *)
@@ -110,7 +139,7 @@ let rec admin_sign_up st =
       let aid = (State.get_admins st |> List.length |> string_of_int) in
       let admin = Admin.make_admin aid name pwd in 
       let new_state = State.add_admin st aid (Admin.to_json admin) in 
-      waiting_room admin new_state 
+      admin_room admin new_state 
   with
   | State.UsernameTaken -> 
     print_endline "Username taken."; 
@@ -122,12 +151,13 @@ let rec sign_up st survey =
   print_endline "Create Admin account?";
   print_endline "| Yes [0] | No [1] |";
   print_string "> ";
-  match read_int () with 
-  | 0 -> admin_sign_up st 
-  | 1 -> user_sign_up st survey 
-  | _ -> begin 
-      print_endline "Invalid Entry"; sign_up st survey
-    end
+  try
+    match read_int () with 
+    | 0 -> admin_sign_up st 
+    | 1 -> user_sign_up st survey 
+    | _ -> print_endline "Invalid Entry"; sign_up st survey
+  with 
+  | _ -> print_endline "Invalid Entry"; sign_up st survey
 
 let rec print_notifs state = function 
   | [] -> ()
@@ -145,6 +175,7 @@ let rec check_notifs user st =
     begin 
       print_endline "Would you like to read your notifications?";
       print_endline "| Yes [0] | No [1] |";
+      print_string "> ";
       try 
         match read_int () with 
         | 0 -> print_notifs st notifs; waiting_room user st
@@ -156,12 +187,12 @@ let rec check_notifs user st =
   else waiting_room user st
 
 let user_logged_in user st = 
-  check_notifs user st;
-  if send_notif st user = st then waiting_room user st 
-  else print_endline "\nMessage sent."; waiting_room user st
+  check_notifs user st
+(* if send_notif st user = st then waiting_room user st 
+   else print_endline "\nMessage sent."; waiting_room user st *)
 
 let admin_logged_in adm st = 
-  waiting_room adm st
+  admin_room adm st
 
 let val_admin_or_user st nm pass = 
   try 
