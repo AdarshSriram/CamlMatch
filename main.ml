@@ -24,8 +24,7 @@ let generate_graph st =
   State.draw_graph st; 
   print_endline "User graph generated !"
 
-(** [waiting_room st] tells user to wait while they are matched to other users
-    in state [st] *)
+(** [waiting_room user st] is the main system loop for a [user] in [st] *)
 let rec waiting_room user st = 
   print_newline ();
   print_endline "Enter a command. Type [help] to see the list of 
@@ -35,12 +34,17 @@ let rec waiting_room user st =
   try
     match Command.parse_user user comm st with 
     | Send user -> failwith "Unimplemented send command"
+    | View _ -> waiting_room user st
     | Quit -> ()
   with 
   | Command.Malformed -> begin 
       print_endline "\nCommand not recognized.";
       waiting_room user st
     end
+  | _ -> begin 
+      print_endline "\nAn error has occured.";
+      waiting_room user st
+    end 
 
 let rec admin_room admin st = 
   print_newline ();
@@ -187,7 +191,9 @@ let rec check_notifs user st =
   else waiting_room user st
 
 let user_logged_in user st = 
-  check_notifs user st
+  Client.incr_logins user;
+  let logged_st = State.replace_user st user in 
+  check_notifs user (State.store_users logged_st)
 (* if send_notif st user = st then waiting_room user st 
    else print_endline "\nMessage sent."; waiting_room user st *)
 

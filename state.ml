@@ -269,25 +269,6 @@ let display_histogram st qid =
 let question_histogram qid st admin = 
   display_histogram st qid
 
-(* FOR TESTING ONLY - REMOVE DUPLICATE CODE WITH HELPER FUNCTION *)
-let test_add_user st uid user =
-  let admins = st.admin_list in 
-  match st.user_list with 
-  | `Assoc x -> begin 
-      let users = `Assoc ((uid, user) :: x) in 
-      {user_list = users; admin_list = admins}
-    end 
-  | _ -> failwith "json error"
-
-let test_add_admin st aid admin =
-  let users = st.user_list in 
-  match st.admin_list with 
-  | `Assoc x -> begin 
-      let admins = `Assoc ((aid, admin) :: x) in 
-      {user_list = users; admin_list = admins}
-    end 
-  | _ -> failwith "json error"
-
 module Flt = struct 
   type t = float
 
@@ -397,5 +378,26 @@ let draw_graph st =
 let connected_components st = 
   (make_graph st |> snd) 
 
+<<<<<<< HEAD
 let test_histogram_values st qid ulist = 
   get_prefs st qid [] ulist
+=======
+(* FOR TESTING ONLY - REMOVE DUPLICATE CODE WITH HELPER FUNCTION *)
+let test_add_user st uid user =
+  let admins = st.admin_list in 
+  match st.user_list with 
+  | `Assoc x -> begin 
+      let users = `Assoc ((uid, user) :: x) in 
+      {user_list = users; admin_list = admins}
+    end 
+  | _ -> failwith "json error"
+
+let test_add_admin st aid admin =
+  let users = st.user_list in 
+  match st.admin_list with 
+  | `Assoc x -> begin 
+      let admins = `Assoc ((aid, admin) :: x) in 
+      {user_list = users; admin_list = admins}
+    end 
+  | _ -> failwith "json error"
+>>>>>>> Added view matches command

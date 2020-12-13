@@ -2,6 +2,7 @@ type message = string
 
 type command =
   | Send of (string*message)
+  | View of string
   | Quit
 
 type acommand = 
@@ -13,8 +14,8 @@ exception NoUserFound
 
 let p el = el <> ""
 
-(* [valid_send command] checks if the phrase of [command]
-   is valid. *)
+(** [valid_send command] checks if the phrase of [command]
+    is valid. *)
 let valid_send st command user =
   match command with 
   | h::[] -> raise Malformed
@@ -23,9 +24,22 @@ let valid_send st command user =
     else raise NoUserFound
   | [] -> raise Malformed
 
+(** [valid_view st rest user] checks if [rest] is valid and calls the 
+    appropriate function based on [rest]. 
+    Raises: Malformed if [rest] is invalid *)
+let valid_view st rest user = 
+  match rest with 
+  | h :: [] -> begin 
+      if h = "matches" 
+      then (State.print_matches st user; View h)
+      else raise Malformed
+    end 
+  | [] | _ -> raise Malformed
+
 let command verb rest st user = 
   let len = List.length rest in
   if verb = "send" && len > 0 then valid_send st rest user 
+  else if verb = "view" && len > 0 then valid_view st rest user
   else if verb = "quit" && len = 0 then Quit 
   else raise Malformed
 

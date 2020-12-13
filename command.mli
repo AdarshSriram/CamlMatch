@@ -10,6 +10,7 @@ type message = string
     into a verb and possible an object phrase. *)
 type command =
   | Send of (string*message)
+  | View of string 
   | Quit
 
 (** The type [acommand] represents an admin command that is decomposed
