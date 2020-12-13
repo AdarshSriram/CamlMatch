@@ -378,10 +378,7 @@ let draw_graph st =
 let connected_components st = 
   (make_graph st |> snd) 
 
-<<<<<<< HEAD
-let test_histogram_values st qid ulist = 
-  get_prefs st qid [] ulist
-=======
+
 (* FOR TESTING ONLY - REMOVE DUPLICATE CODE WITH HELPER FUNCTION *)
 let test_add_user st uid user =
   let admins = st.admin_list in 
@@ -400,4 +397,6 @@ let test_add_admin st aid admin =
       {user_list = users; admin_list = admins}
     end 
   | _ -> failwith "json error"
->>>>>>> Added view matches command
+
+let test_histogram_values st qid ulist = 
+  get_prefs st qid [] ulist
