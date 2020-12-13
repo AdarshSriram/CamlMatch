@@ -17,6 +17,8 @@ type command =
     into a verb and possible an object phrase. *)
 type acommand =
   | Hist of string
+  | Graph
+  | Dist of string*string
   | Quit
 
 (** Raised when a malformed command is encountered. *)

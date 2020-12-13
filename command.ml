@@ -7,6 +7,8 @@ type command =
 
 type acommand = 
   | Hist of string
+  | Graph
+  | Dist of string*string
   | Quit
 
 exception Malformed
@@ -48,7 +50,7 @@ let parse_user user str st =
     String.split_on_char ' ' str
     |> List.filter p in
   match lst with
-  | h :: t -> command (String.lowercase_ascii h) t st user
+  | h :: t -> command (String.lowercase_ascii h |> String.trim) t st user
   | [] -> raise Malformed
 
 let valid_hist st command admin = 
@@ -62,9 +64,16 @@ let valid_hist st command admin =
       | Failure f -> raise Malformed
     end
 
+let valid_dist st admin command = 
+  match command with 
+  | u1::u2::[] -> Dist (u1, u2)
+  | _ -> raise Malformed
+
 let acommand verb rest st admin = 
   let len = List.length rest in 
   if verb = "hist" && len > 0 then valid_hist st rest admin else
+  if verb = "graph" && len = 0 then Graph else
+  if verb = "dist" && len > 0 then valid_dist st admin rest else
   if verb = "quit" && len = 0 then Quit else 
     raise Malformed
 
@@ -73,5 +82,5 @@ let parse_admin admin str st =
     String.split_on_char ' ' str
     |> List.filter p in
   match lst with
-  | h :: t -> acommand (String.lowercase_ascii h) t st admin
+  | h :: t -> acommand (String.lowercase_ascii h |> String.trim) t st admin
   | [] -> raise Malformed

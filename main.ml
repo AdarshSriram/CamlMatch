@@ -1,24 +1,12 @@
 
 (** [prompt_command user] prompts a user command for a user not in chat. *)
-let rec send_notif st user  =
-  print_endline "Would you like to send a message to one of your matches?";
-  print_endline "| Yes [0] | No [1] |";
-  try 
-    match read_int () with 
-    | 1 -> st; 
-    | 0 -> print_endline "Enter user's username."; 
-      let uname = read_line () in
-      if State.can_send st uname user then 
-        begin
-          print_endline "Enter your message."; 
-          let msg = read_line () in
-          State.send_notification st user uname msg 
-        end 
-      else raise State.InvalidUser
-    | _ -> print_endline "Invalid answer"; send_notif st user 
+let rec send_notif st user uname msg =
+  try  
+    State.send_notification st user uname msg 
   with 
-  | State.InvalidUser -> print_endline "Invalid Username"; send_notif st user
-  | _ -> print_endline "Invalid"; send_notif st user 
+  | State.InvalidMatch -> print_endline ("You are not matched with " ^ uname); 
+    st
+  | _ -> print_endline "Could not send message."; st
 
 let generate_graph st =
   State.draw_graph st; 
@@ -33,7 +21,12 @@ let rec waiting_room user st =
   let comm = read_line () in
   try
     match Command.parse_user user comm st with 
-    | Send user -> failwith "Unimplemented send command"
+    | Send (receiver, msg) -> 
+      begin 
+        let sent_state = send_notif st user receiver msg in 
+        if sent_state = st then waiting_room user st 
+        else print_endline "Message sent"; waiting_room user sent_state
+      end
     | View _ -> waiting_room user st
     | Quit -> ()
   with 
@@ -55,6 +48,16 @@ let rec admin_room admin st =
   try
     match Command.parse_admin admin comm st with 
     | Hist q -> admin_room admin st
+    | Graph -> State.draw_graph st; admin_room admin st 
+    | Dist (u1, u2) -> 
+      begin 
+        let dist = State.shortest_path st u1 u2 in 
+        let msg = if dist = -1 then "Invalid usernames"
+          else 
+            let friend = if dist = 1 then " friend " else " friends " in
+            u1 ^ " is " ^ (string_of_int dist) ^  friend ^ "away from "^ u2 ^"." in 
+        print_endline msg; admin_room admin st
+      end 
     | Quit -> ()
   with 
   | _ -> begin 
@@ -101,17 +104,16 @@ let calc_matches user st surv =
   let matched_state = State.store_users updated_state in 
   print_endline "Here are the matches we have found: ";
   State.print_matches matched_state user;
-  let sent_state = send_notif matched_state user in 
-  if sent_state = matched_state then () else print_endline "Message sent";
   waiting_room user matched_state
 
 let rec user_sign_up st survey = 
-  print_endline "Please enter your name to begin the questionaire.";
+  print_endline "Please enter your name to begin the questionaire (No spaces).";
   print_string  "> ";
   try let name = read_line () in
-    if String.length name < 1 
-    then failwith "Name too short" 
-    else
+    if String.contains name ' ' then failwith "Remove all spaces." 
+    else 
+    if String.length name < 1 then failwith "Name too short" 
+    else 
     if not (State.user_can_sign_up st name) then raise State.UsernameTaken 
     else
       let pwd = get_pwd () in
