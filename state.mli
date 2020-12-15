@@ -81,6 +81,17 @@ val replace_user : state -> Client.t -> state
     if [m_name] is not an existing user *)
 val send_notification : state -> Client.t -> string -> string -> state 
 
+(** [change_user_pword st user pword] updates the [user's] password to the 
+    encrypted form for [pword] and returns the new state with the updated 
+    user *)
+val change_user_pword : state -> Client.t -> string -> state 
+
+(** [change_user_pword st admin pword] updates the [admins's] password to the 
+    encrypted form for [pword] and returns the new state with the updated 
+    admin *)
+val change_admin_pword : state -> Admin.t -> string -> state 
+
+
 (** [read_notifs st user] pretty-prints the [user]'s notfications to the 
     console *)
 val read_notifs : state -> Client.t -> unit

@@ -5,7 +5,7 @@ type aid = string
 type t = {
   a_id : aid;
   name : string;
-  pword : string;
+  mutable pword : string;
 }
 
 let make_admin id n p =
@@ -21,6 +21,10 @@ let get_name ad = ad.name
 
 let get_login ad = (ad.name, ad.pword)
 
+let encrypt p = p |> Hashtbl.hash |> string_of_int
+
+let update_pword ad pword = 
+  ad.pword <- pword
 
 let to_json admin = 
   `Assoc [
@@ -38,6 +42,4 @@ let read_json json =
     name = name;
     pword = pword;
   }
-
-let encrypt p = p |> Hashtbl.hash |> string_of_int
 

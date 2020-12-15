@@ -9,7 +9,7 @@ exception InvalidMatch
 type online_user = {
   user_id : uid;
   name : string;
-  pword : string;
+  mutable pword : string;
   mutable logins : int;
   mutable preferences : (string*string) list;
   mutable matches : (uid*float) list;
@@ -56,6 +56,9 @@ let clear_notifs user =
 
 let incr_logins user = 
   user.logins <- user.logins + 1
+
+let update_pword user pword = 
+  user.pword <- pword
 
 let rec user_of_uid id = function 
   | [] -> raise (UserNotFound id)
@@ -115,3 +118,4 @@ let read_json json =
   }
 
 let encrypt p = p |> Hashtbl.hash |> string_of_int
+

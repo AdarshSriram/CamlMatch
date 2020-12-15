@@ -12,6 +12,16 @@ let generate_graph st =
   State.draw_graph st; 
   print_endline "User graph generated !"
 
+(**Helper for sign_up that safely gets user's password*)
+let rec get_pwd dummy = 
+  print_endline "Please enter a password (must be more than 6 characters).";
+  print_string "> ";
+  try let pwd = read_line () in 
+    if String.length pwd < 6 then failwith "Invalid pwd" else 
+      Client.encrypt pwd
+  with 
+  | _ -> print_endline "Invalid password"; get_pwd ()
+
 (** [waiting_room user st] is the main system loop for a [user] in [st] *)
 let rec waiting_room user st = 
   print_newline ();
@@ -28,6 +38,10 @@ let rec waiting_room user st =
         else print_endline "Message sent"; waiting_room user sent_state
       end
     | View _ -> waiting_room user st
+    | UReset pword -> begin 
+        let pword = get_pwd () in 
+        waiting_room user (State.change_user_pword st user pword)
+      end 
     | Quit -> ()
   with 
   | Command.Malformed -> begin 
@@ -58,6 +72,10 @@ let rec admin_room admin st =
             u1 ^ " is " ^ (string_of_int dist) ^  friend ^ "away from "^ u2 ^"." in 
         print_endline msg; admin_room admin st
       end 
+    | AReset _ -> begin 
+        let pword = get_pwd () in 
+        admin_room admin (State.change_admin_pword st admin pword)
+      end 
     | Quit -> ()
   with 
   | _ -> begin 
@@ -86,15 +104,14 @@ let rec fill_prefs user q_list new_prefs survey =
         end
     end
 
-(**Helper for sign_up that safely gets user's password*)
-let rec get_pwd dummy = 
-  print_endline "Please enter a password (must be more than 6 characters).";
-  print_string "> ";
-  try let pwd = read_line () in 
-    if String.length pwd < 6 then failwith "Invalid pwd" else 
-      Client.encrypt pwd
-  with 
-  | _ -> print_endline "Invalid password"; get_pwd ()
+let display_matches user st = 
+  print_endline "Here are the matches we have found: ";
+  State.print_matches st user;
+  waiting_room user st
+
+let no_matches user st = 
+  print_endline "Sorry, you currently do not have any matches."; 
+  waiting_room user st
 
 (** Calculates the matches for the user *)
 let calc_matches user st surv = 
@@ -102,9 +119,9 @@ let calc_matches user st surv =
   Client.update_matches user matches;
   let updated_state = State.replace_user st user in 
   let matched_state = State.store_users updated_state in 
-  print_endline "Here are the matches we have found: ";
-  State.print_matches matched_state user;
-  waiting_room user matched_state
+  if matches <> [] then display_matches user matched_state
+  else no_matches user matched_state
+
 
 let rec user_sign_up st survey = 
   print_endline "Please enter your name to begin the questionaire (No spaces).";

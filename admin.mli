@@ -24,6 +24,10 @@ val get_name : t -> string
 (** [get_login ad] returns the username/password combo for the admin [ad] *)
 val get_login : t -> string * string
 
+(** [update_pword admin p] updates the [admins's] password [p], which is 
+    encrypted *)
+val update_pword : t -> string -> unit 
+
 (** [to_json ad] converts [ad] into a json format *)
 val to_json : t -> Yojson.Basic.t
 

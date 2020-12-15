@@ -11,6 +11,7 @@ type message = string
 type command =
   | Send of (string*message)
   | View of string 
+  | UReset of string 
   | Quit
 
 (** The type [acommand] represents an admin command that is decomposed
@@ -19,6 +20,7 @@ type acommand =
   | Hist of string
   | Graph
   | Dist of string*string
+  | AReset of string
   | Quit
 
 (** Raised when a malformed command is encountered. *)

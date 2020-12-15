@@ -18,7 +18,7 @@ exception UserNotFound of uid
 exception InvalidMatch 
 
 (** [make_user n p id] creates a user with an user id [id], a name [n], 
-    a password [p], no preferences, no current chats, and no matches 
+    an ecrypted password [p], no preferences, no current chats, and no matches 
     Requires: [id] must be unique/unused *)
 val make_user : string -> string -> uid -> t 
 
@@ -64,6 +64,10 @@ val clear_notifs : t -> unit
 (** [incr_logins user] increments the number of times [user] has logged in
     by 1 *)
 val incr_logins : t -> unit
+
+(** [update_pword user p] updates the [user's] password [p], which is encrypted 
+*)
+val update_pword : t -> string -> unit
 
 (** [user_of_uid id users] returns the user from [users] whose user id is [id].
     Raises: UserNotFound of [id] if [id] is not in [users] *)

@@ -67,18 +67,24 @@ let user_of_id_raises_test
         (fun () -> Client.user_of_uid id lst))
 
 let u1 = Client.make_user "user 1" "pass1" "1" 
-let u2 = Client.make_user "user 2" "pass1" "2"
+let u2 = Client.make_user "user 2" "pass2" "2"
 let u3 = Client.make_user "user 3" "pass1" "3"
 let u4 = Client.make_user "user 4" "pass4" "4"
+
+let encrypt_p1 = Client.encrypt "change1"
 
 let client_tests = [
   (* Testing make_user *)
   get_id_test "User id of u1 is 1" u1 "1"; 
   get_name_test "Name of u1 is user 1" u1 "user 1";
-  get_login_test "Creditials is user 1 pass1" u1 ("user 1", "pass1");
+  get_login_test "Creditials is user 2 pass2" u2 ("user 2", "pass2");
   get_pref_test "Preferences of user 1 is []" u1 [];
   get_matches_test "User 1 has no matches" u1 [];
   get_logins_test "User 1 has 0 logins" u1 0;
+
+  (*Testing mutable password *)
+  get_login_test "Change pword for u1" (Client.update_pword u1 encrypt_p1; u1)
+    ("user 1", encrypt_p1);
 
   get_pref_test "Updated U1 preferences are [3;1]" 
     (Client.update_prefs u2 [("q1", "2"); ("q2", "1")]; u2) 

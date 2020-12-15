@@ -128,6 +128,7 @@ let validate_admin st n p =
       end in
   match_creds cred_list
 
+
 (** [get_user_recs st] returns the list of user records *)
 let get_user_recs st = 
   let assoc_list = st.user_list |> to_assoc in
@@ -142,12 +143,20 @@ let rec find_user_by_name name = function
     end 
 
 let rec replace_user st user =
-  let repl (x, y) = 
-    if Client.get_uid user = x 
+  let repl (id, json) = 
+    if Client.get_uid user = id
     then (Client.get_uid user, Client.to_json user) 
-    else (x, y) in 
+    else (id, json) in 
   let new_users = List.map repl (to_assoc st.user_list) in
   {st with user_list = `Assoc new_users}
+
+let rec replace_admin st admin =
+  let repl (aid, json) = 
+    if Admin.get_aid admin = aid
+    then (Admin.get_aid admin, Admin.to_json admin) 
+    else (aid, json) in 
+  let new_admins = List.map repl (to_assoc st.admin_list) in
+  {st with admin_list = `Assoc new_admins}
 
 let send_notification st user (m_name : string) msg = 
   let receiver = get_user_recs st |> find_user_by_name m_name in 
@@ -192,6 +201,16 @@ let can_send st receiver user =
     | (_, (a, _)) ::t ->  if a = receiver && a <> Client.get_name user
       then true else check_creds t in
   check_creds creds
+
+let change_user_pword st user pword = 
+  let new_user = Client.update_pword user pword; user in 
+  let new_st = replace_user st new_user in 
+  store_users new_st
+
+let change_admin_pword st admin pword = 
+  Admin.update_pword admin pword; 
+  let new_st = replace_admin st admin in 
+  store_admins new_st
 
 let print_user_stats st uid = 
   let user = get_user_by_id st uid in 
@@ -269,6 +288,7 @@ let display_histogram st qid =
 let question_histogram qid st admin = 
   display_histogram st qid
 
+(* User graph implementation *)
 module Flt = struct 
   type t = float
 
