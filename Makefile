@@ -1,5 +1,7 @@
 MODULES=main client state survey command admin author
 OBJECTS=$(MODULES:=.cmo)
+MLS=$(MODULES:=.ml)
+MLIS=$(MODULES:=.mli)
 OCAMLBUILD=ocamlbuild -use-ocamlfind
 MAIN=main.byte # start match/messaging
 
@@ -38,6 +40,19 @@ test_admin:
 
 match:
 	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
+
+docs: docs-public docs-private
+	
+docs-public: build
+	mkdir -p doc.public
+	ocamlfind ocamldoc -I _build -package yojson,ANSITerminal,ocamlgraph \
+		-html -stars -d doc.public $(MLIS)
+
+docs-private: build
+	mkdir -p doc.private
+	ocamlfind ocamldoc -I _build -package yojson,ANSITerminal,ocamlgraph \
+		-html -stars -d doc.private \
+		-inv-merge-ml-mli -m A $(MLIS) $(MLS)
 
 zip: 
 	zip final_project.zip *.ml* *.json _tags INSTALL.txt Makefile
