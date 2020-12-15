@@ -180,6 +180,19 @@ let read_notifs st user =
       end in
   print_to_console (Client.get_notifs user)
 
+let add_user_to_matches st user mlist = 
+  let rec aux st = function 
+    | [] -> st 
+    | (id, score) :: t -> begin
+        let m_user = get_user_by_id st id in 
+        Client.update_matches m_user 
+          ((Client.get_uid user, score) :: Client.get_matches m_user);
+        let new_st = replace_user st m_user in 
+        aux new_st t 
+      end
+  in 
+  aux st mlist
+
 let print_matches st user = 
   let rec print_helper = function
     | [] -> print_newline ()

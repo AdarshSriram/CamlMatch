@@ -81,6 +81,12 @@ val replace_user : state -> Client.t -> state
     if [m_name] is not an existing user *)
 val send_notification : state -> Client.t -> string -> string -> state 
 
+(** [add_user_to_matches st user mlist] adds the users in [mlist] to [user's] 
+    match list in the state [st] *)
+val add_user_to_matches : state -> Client.t -> (Client.uid * float) list 
+  -> state
+
+
 (** [change_user_pword st user pword] updates the [user's] password to the 
     encrypted form for [pword] and returns the new state with the updated 
     user *)

@@ -119,8 +119,10 @@ let calc_matches user st surv =
   Client.update_matches user matches;
   let updated_state = State.replace_user st user in 
   let matched_state = State.store_users updated_state in 
-  if matches <> [] then display_matches user matched_state
-  else no_matches user matched_state
+  let update_m_st = State.add_user_to_matches matched_state user matches in 
+  let final_state = State.store_users update_m_st in 
+  if matches <> [] then display_matches user final_state
+  else no_matches user final_state
 
 
 let rec user_sign_up st survey = 
