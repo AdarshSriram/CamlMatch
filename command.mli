@@ -13,6 +13,7 @@ type command =
   | View of string 
   | UReset of string 
   | Quit
+  | CHelp of string
 
 (** The type [acommand] represents an admin command that is decomposed
     into a verb and possible an object phrase. *)
@@ -22,6 +23,7 @@ type acommand =
   | Dist of string*string
   | AReset of string
   | Quit
+  | AHelp of string
 
 (** Raised when a malformed command is encountered. *)
 exception Malformed

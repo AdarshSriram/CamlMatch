@@ -1,3 +1,4 @@
+let current_survey = "survey1.json"
 
 (** [prompt_command user] prompts a user command for a user not in chat. *)
 let rec send_notif st user uname msg =
@@ -43,6 +44,10 @@ let rec waiting_room user st =
         waiting_room user (State.change_user_pword st user pword)
       end 
     | Quit -> ()
+    | CHelp txt -> begin 
+        print_endline txt;
+        waiting_room user st
+      end
   with 
   | Command.Malformed -> begin 
       print_endline "\nCommand not recognized.";
@@ -61,7 +66,11 @@ let rec admin_room admin st =
   let comm = read_line () in
   try
     match Command.parse_admin admin comm st with 
-    | Hist q -> admin_room admin st
+    | Hist q -> begin
+        let s = Yojson.Basic.from_file current_survey |> Survey.from_json in
+        Survey.question_histogram q st admin s;
+        admin_room admin st
+      end
     | Graph -> State.draw_graph st; admin_room admin st 
     | Dist (u1, u2) -> 
       begin 
@@ -77,6 +86,10 @@ let rec admin_room admin st =
         admin_room admin (State.change_admin_pword st admin pword)
       end 
     | Quit -> ()
+    | AHelp txt -> begin 
+        print_endline txt;
+        admin_room admin st
+      end
   with 
   | _ -> begin 
       print_endline "Command not recognized.";
@@ -251,7 +264,7 @@ let rec execute_system dummy =
   try
     let start = read_int () in
     let init_state = State.get_state "Users.json" "Admins.json" in 
-    let survey = Yojson.Basic.from_file "survey1.json" |> Survey.from_json in 
+    let survey = Yojson.Basic.from_file current_survey |> Survey.from_json in 
     if start = 0 then sign_up init_state survey
     else if start = 1 then log_in init_state 
     else failwith "Invalid entry"

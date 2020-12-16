@@ -5,6 +5,7 @@ type command =
   | View of string
   | UReset of string
   | Quit
+  | CHelp of string
 
 type acommand = 
   | Hist of string
@@ -12,11 +13,27 @@ type acommand =
   | Dist of string*string
   | AReset of string
   | Quit
+  | AHelp of string
 
 exception Malformed
 exception NoUserFound
 
 let not_empty el = el <> ""
+
+let command_list = 
+  "\n\t[send uname msg] sends [msg] to the user with username [uname]
+\t[view matches] prints your match list
+\t[reset password] allows you to reset your password
+\t[quit] exits you out of the system"
+
+let acommand_list = 
+  "\n\t[hist qid] displays a histogram describing how users answered the question 
+\t\twith ID [qid]
+\t[graph] creates a connection graph visualizing the network of matches
+\t[dist u1 u2] returns how many users [u1] and [u2] are from each other in terms
+\t\tof matches
+\t[reset password] allows you to reset your password
+\t[quit] exits you out of the system"
 
 (** [valid_send command] checks if the phrase of [command]
     is valid. *)
@@ -56,6 +73,7 @@ let command verb rest st user =
   else if verb = "view" && len > 0 then valid_view st rest user
   else if verb = "reset" && len > 0 then valid_ureset st rest user
   else if verb = "quit" && len = 0 then Quit 
+  else if verb = "help" && len = 0 then CHelp command_list
   else raise Malformed
 
 let parse_user user str st =
@@ -68,14 +86,8 @@ let parse_user user str st =
 
 let valid_hist st command admin = 
   match command with 
-  | [] -> raise Malformed
-  | h :: t -> begin
-      try
-        State.question_histogram h st admin;
-        Hist h
-      with
-      | Failure f -> raise Malformed
-    end
+  | h :: [] -> Hist h
+  | _ -> raise Malformed
 
 let valid_dist st admin command = 
   match command with 
@@ -97,7 +109,8 @@ let acommand verb rest st admin =
   if verb = "dist" && len > 0 then valid_dist st admin rest else
   if verb = "reset" && len > 0 then valid_areset st rest admin else  
   if verb = "quit" && len = 0 then Quit else 
-    raise Malformed
+  if verb = "help" && len = 0 then AHelp acommand_list
+  else raise Malformed
 
 let parse_admin admin str st = 
   let lst = 

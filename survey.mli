@@ -60,7 +60,13 @@ val compile_matches : Client.t -> State.state -> q list ->
     Requires: [id] is a valid question id in survey [s]*)
 val print_question : t -> qid -> unit
 
+(** [question_histogram qid st admin survey] displays a histogram of user
+    responses for question [qid] in [st] for [admin] and [survey]. *)
+val question_histogram : string -> State.state -> Admin.t -> t -> unit
+
 (* FOR TESTING ONLY *)
+val test_hist_values : State.state -> qid -> Client.uid list -> t -> int list
+
 val q_list : q list 
 val q3_ans : a list 
 val q4_rec : q

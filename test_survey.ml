@@ -47,6 +47,7 @@ let empty_state = State.init_state ()
 
 let pref_state = State.get_state "test_jsons/PrefUsers.json" 
     "test_jsons/DummyAdmins.json"
+let user_uids = State.get_users pref_state
 
 let rec get_user_by_id id = function 
   | [] -> failwith "No such user"
@@ -116,6 +117,16 @@ let compile_matches_test
         ~printer: (pp_list (fun x -> x) string_of_float)
         ~cmp: list_close_enough)
 
+let hist_values_test 
+    (name : string) 
+    (st : State.state) 
+    (qid : string) 
+    (ulist : string list)
+    (survey : t) 
+    (expected : int list) = 
+  name >:: (fun _ -> 
+      assert_equal expected (test_hist_values st qid ulist survey))
+
 let survey_tests = [
   question_list_test "Empty survey returns empty list" empty_survey [];
   question_list_test "Survey 1 returns q list" survey1 Survey.q_list;
@@ -153,6 +164,15 @@ let survey_tests = [
   compile_matches_test "u4 should have u2 and u3 as a match" u4_prefs 
     pref_state survey1 [("2", (1. /. 3.) /. 4.); ("3", (1. /. 3.) /. 4.)];
 
+  (* testing histogram *)
+  hist_values_test "q1 with pref_state" pref_state "q1" user_uids 
+    survey1 [1;1;0;2];
+  hist_values_test "q2 with pref_state" pref_state "q2" user_uids 
+    survey1 [1;3;0;0];
+  hist_values_test "q3 with pref_state" pref_state "q3" user_uids 
+    survey1 [2;2];
+  hist_values_test "q4 with pref_state" pref_state "q4" user_uids 
+    survey1 [1;1;1;1];
 ]
 
 let suite = 

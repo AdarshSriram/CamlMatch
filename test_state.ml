@@ -102,15 +102,6 @@ let admin_can_sign_up_test
   name >:: (fun _ -> 
       assert_equal res (admin_can_sign_up st aname))
 
-let hist_values_test 
-    (name : string) 
-    (st : state) 
-    (qid : string) 
-    (ulist : string list) 
-    (expected : int list) = 
-  name >:: (fun _ -> 
-      assert_equal expected (test_histogram_values st qid ulist))
-
 let test_state = State.get_state "test_jsons/DummyUsers.json" 
     "test_jsons/DummyAdmins.json"
 let empty_state = State.init_state ()
@@ -128,9 +119,6 @@ let add_admin_state = State.get_state "test_jsons/DummyUser.json"
 
 let a0 = Admin.make_admin "0" "admin 0" "257709571"
 
-let pref_state = get_state "test_jsons/PrefUsers.json" 
-    "test_jsons/DummyAdmins.json"
-let pref_users = get_users pref_state
 
 let state_tests = [
   get_users_test "Get users from DummyUsers" test_state 
@@ -175,12 +163,6 @@ let state_tests = [
 
   admin_can_sign_up_test "admin 4 can sign up" test_state "admin 4" true;
   admin_can_sign_up_test "admin 1 cannot sign up" test_state "admin 0" false;
-
-  (* testing histogram *)
-  hist_values_test "q1 with pref_state" pref_state "q1" pref_users [1;1;0;2];
-  hist_values_test "q2 with pref_state" pref_state "q2" pref_users [1;3];
-  hist_values_test "q3 with pref_state" pref_state "q3" pref_users [2;2];
-  hist_values_test "q4 with pref_state" pref_state "q4" pref_users [1;1;1;1];
 ]
 
 let suite = 

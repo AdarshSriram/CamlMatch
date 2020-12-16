@@ -234,74 +234,6 @@ let print_user_stats st uid =
   print_endline ("Survey Questions Answered?: " ^ string_of_bool answer_survey);
   print_string ("Number of Matches: " ^ string_of_int num_matches)
 
-let rec add_ans ans acc = 
-  match ans, acc with 
-  | 0, h :: t -> (h + 1) :: t
-  | n, h :: t -> h :: add_ans (n-1) t 
-  | n, [] -> add_ans n (0 :: acc)
-
-let count_ans qid prefs acc = 
-  try
-    let ans = int_of_string (List.assoc qid prefs) in 
-    add_ans ans acc
-  with 
-  | Not_found -> failwith "Question not found."
-
-let rec get_prefs st qid acc = function 
-  | [] -> acc
-  | h :: t -> begin 
-      let user_pref = h |> get_user_by_id st |> Client.get_preferences in
-      let new_acc = count_ans qid user_pref acc in 
-      get_prefs st qid new_acc t
-    end
-
-let rec add_bar lst acc = 
-  match lst with 
-  | [] -> 
-    acc 
-  | h :: t -> begin
-      if h = 0 then add_bar t acc ^ "__ "
-      else add_bar t acc ^ "   "
-    end
-
-let rec add_qnum n str c = 
-  if c > n then str
-  else
-    let str = str ^ (string_of_int c) ^ "  " in 
-    add_qnum n str (c+1)
-
-let display_line lst count = 
-  if count = 0 then 
-    let len = List.length lst in
-    let str = "1 |" ^ String.make (1 + 3 * len) '_' in 
-    add_qnum len (str ^ "\n    ") 1
-  else
-    let str = (string_of_int (count+1)) ^ " | " in 
-    add_bar lst str
-
-let rec print_ansi lst = function 
-  | -1 -> () 
-  | n -> begin 
-      ANSITerminal.(print_string [cyan; Bold] (display_line lst n));
-      print_newline ();
-      print_ansi (List.map (fun x -> x-1) lst) (n-1)
-    end
-
-let display_histogram st qid = 
-  let users = get_users st in
-  let hist = get_prefs st qid [] users in 
-  let user_len = List.length users in 
-  let rev_hist = List.map (fun x -> user_len - x) hist in 
-  print_newline ();
-  ANSITerminal.(print_string [Bold;Underlined] ("Question: " ^ qid));
-  print_newline ();
-  print_newline ();
-  print_ansi rev_hist user_len
-
-let question_histogram qid st admin = 
-  display_histogram st qid
-
-(* User graph implementation *)
 module Flt = struct 
   type t = float
 
@@ -430,6 +362,3 @@ let test_add_admin st aid admin =
       {user_list = users; admin_list = admins}
     end 
   | _ -> failwith "json error"
-
-let test_histogram_values st qid ulist = 
-  get_prefs st qid [] ulist

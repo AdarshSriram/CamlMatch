@@ -109,10 +109,6 @@ val print_matches : state -> Client.t -> unit
 (** [get_user_recs st] returns the users in state [st] *)
 val get_user_recs : state -> Client.t list 
 
-(** [question_histogram qid st admin] displays a histogram of user
-    responses for question [qid] in [st] for [admin]. *)
-val question_histogram : string -> state -> Admin.t -> unit
-
 val draw_graph : state -> unit
 
 val connected_components : state -> (string list) list
@@ -131,5 +127,3 @@ val print_user_stats : state -> Client.uid -> unit
 val test_add_user : state -> Client.uid -> Yojson.Basic.t -> state
 
 val test_add_admin : state -> Admin.aid -> Yojson.Basic.t -> state
-
-val test_histogram_values : state -> string -> string list -> int list
