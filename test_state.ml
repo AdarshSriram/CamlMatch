@@ -34,7 +34,8 @@ let add_user_test
     (user : Yojson.Basic.t) 
     (res : state) = 
   name >:: (fun _ -> 
-      assert_equal (get_users res) (get_users(test_add_user store uid user)))
+      assert_equal (get_users res) 
+        (get_users (add_user store false uid user)))
 
 let get_u_by_id_test 
     (name : string) 
@@ -75,7 +76,8 @@ let add_admin_test
     (admin : Yojson.Basic.t) 
     (res : state) = 
   name >:: (fun _ -> 
-      assert_equal (get_admins res) (get_admins (test_add_admin st aid admin)))
+      assert_equal (get_admins res) 
+        (get_admins (add_admin st false aid admin)))
 
 let get_a_by_id_test 
     (name : string) 

@@ -1,8 +1,15 @@
 (** 
    Representation of a survey
 
-   This module represents a survey which contains questions and their answers.
-   A survey is a set-like list.
+   This module represents a survey which contains questions and their answer 
+   choices.
+
+   A valid survey contains each of the follow information for each question:
+   - question id
+   - string represenation of the quesiton
+   - a question type
+   - a list of answers where each answer contains an answer id and a string
+            representation of the answer
 *)
 
 (** The abstract type of values representing a survey *)
@@ -21,17 +28,19 @@ type aid = string
     Requires: [j] is a valid JSON survey representation. *)
 val from_json : Yojson.Basic.t -> t
 
-(** [question_list s] is the current list of questions in the survey [s]. *)
+(** [question_list s] is the current list of questions in the survey [s].
+    Requires: [s] must be valid survey *)
 val question_list : t -> q list
 
-(** [answer_list s id] is the list of possible answers to question [q] in 
+(** [answer_list s qid] is the list of possible answers to question [q] in 
     survey [s] 
-    Raises: Failure if [id] is not valid *)
+    Requires: [s] must be a valid survey
+    Raises: Failure when [qid] is not a valid question id in [s] *)
 val answer_list : t -> qid -> a list  
 
 (** [find_q qlist id] finds the question with id [id] in the question 
     list [q list] 
-    Raises: Failure if [id] is not valid *)
+    Requires: [qid] must be a valid question id in [qlist] *)
 val find_q : q list -> qid -> q 
 
 (** [get_qid qu] returns the id of question [qu] *)
@@ -42,17 +51,16 @@ val get_qid : q -> qid
     Raises: Failure if [ans] is not valid *)
 val check_ans : t -> qid -> aid -> string
 
-(** [add_question sur qu] adds [qu] to [sur] and returns a set-like list. *)
-val add_question : t -> q -> t
-
 (** [type_of_question s id] returns the qtype corresponding to the question 
     with id [id] in survey [s]
     Raises: Failure if [id] is not valid *)
 val type_of_question : t -> qid -> qtype 
 
 (** [compile_matches user state survey] returns a sorted list of matches
-    for [user] with the current user list in [state] for [survey] *) 
-val compile_matches : Client.t -> State.state -> q list -> 
+    for [user] with the current user list in [state] for [survey]
+    Requires: [user] must be a valid user, [state] must be a valid state, 
+    and [survey] must be a valid survey*) 
+val compile_matches : Client.t -> State.state -> t -> 
   (Client.uid * float) list
 
 (** [print_question s id] pretty-prints the question with id [id] from survey 
@@ -61,8 +69,9 @@ val compile_matches : Client.t -> State.state -> q list ->
 val print_question : t -> qid -> unit
 
 (** [question_histogram qid st admin survey] displays a histogram of user
-    responses for question [qid] in [st] for [admin] and [survey]. *)
-val question_histogram : string -> State.state -> Admin.t -> t -> unit
+    responses for question [qid] in [st] and [survey].
+    Raises: Failure if [qid] is not a question id in survey [survey] *)
+val question_histogram : qid -> State.state -> t -> unit
 
 (* FOR TESTING ONLY *)
 val test_hist_values : State.state -> qid -> Client.uid list -> t -> int list

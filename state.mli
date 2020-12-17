@@ -28,15 +28,17 @@ val store_users : state -> state
     returns the new state *)
 val store_admins : state -> state
 
-(* [add_user st uid user] adds user with id [user_id] to [st] and returns the 
-   updated state
+(* [add_user st store uid user] adds user with id [user_id] to [st] and 
+    returns the updated state. The function calls [store_users] if store = true
+    otherwise it just returns the updated state.
  * Requires: [uid] must not be taken *)
-val add_user: state -> Client.uid -> Yojson.Basic.t -> state
+val add_user: state -> bool -> Client.uid -> Yojson.Basic.t -> state
 
 (* [add_admin st aid admin] adds [admin] with id [a_id] to [st] and returns the 
-   updated state
- * Requires: [uid] must not be taken *)
-val add_admin: state -> Admin.aid -> Yojson.Basic.t -> state
+   updated state. The function calls [store_admins] if store = true
+    otherwise it just returns the updated state.
+ * Requires: [aid] must not be taken *)
+val add_admin: state -> bool -> Admin.aid -> Yojson.Basic.t -> state
 
 (** [get_user_by_id st user_id] returns the user associated the the id [user_id] 
     in the state [st] *)
@@ -122,8 +124,3 @@ val shortest_path : state -> string -> string -> int
     Information includes username, number of times logged in, preferences, and 
     number of matches *)
 val print_user_stats : state -> Client.uid -> unit
-
-(** For testing *)
-val test_add_user : state -> Client.uid -> Yojson.Basic.t -> state
-
-val test_add_admin : state -> Admin.aid -> Yojson.Basic.t -> state

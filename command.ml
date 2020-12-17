@@ -1,7 +1,7 @@
 type message = string 
 
 type command =
-  | Send of (string*message)
+  | Send of string*message
   | View of string
   | UReset of string
   | Quit
@@ -17,7 +17,6 @@ type acommand =
   | AView of string
 
 exception Malformed
-exception NoUserFound
 
 let not_empty el = el <> ""
 
@@ -32,19 +31,23 @@ let acommand_list =
 \t\twith ID [qid]
 \t[graph] creates a connection graph visualizing the network of matches
 \t[dist u1 u2] returns how many users [u1] and [u2] are from each other in terms
-\t\tof matches
+\t\tof matches, where [u1], [u2] are usernames
 \t[view uid] displays data about user with ID [uid]
 \t[reset password] allows you to reset your password
 \t[quit] exits you out of the system"
+
+let fold_message other = 
+  List.fold_left (fun acc word -> acc ^ word ^ " ") "" other
 
 (** [valid_send command] checks if the phrase of [command]
     is valid. *)
 let valid_send st command user =
   match command with 
   | h::[] -> raise Malformed
-  | h::t -> if (State.can_send st (h) user) 
-    then Send (h, List.fold_left (fun acc word -> acc ^ word ^ " ") "" t) 
-    else raise NoUserFound
+  | h::t -> begin 
+      if (State.can_send st (h) user) then Send (h, fold_message t) 
+      else raise Malformed
+    end 
   | [] -> raise Malformed
 
 (** [valid_view st rest user] checks if [rest] is valid and calls the 
@@ -93,7 +96,7 @@ let valid_hist st command admin =
 
 let valid_dist st admin command = 
   match command with 
-  | u1::u2::[] -> Dist (u1, u2)
+  | uname1 :: uname2 :: [] -> Dist (uname1, uname2)
   | _ -> raise Malformed
 
 let valid_areset st rest user = 

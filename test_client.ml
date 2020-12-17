@@ -73,6 +73,9 @@ let u4 = Client.make_user "user 4" "pass4" "4"
 
 let encrypt_p1 = Client.encrypt "change1"
 
+let j = Client.to_json u1
+let u1_fromj = Client.read_json j
+
 let client_tests = [
   (* Testing make_user *)
   get_id_test "User id of u1 is 1" u1 "1"; 
@@ -115,6 +118,11 @@ let client_tests = [
   get_logins_test "U2 has logged in once" (Client.incr_logins u2; u2) 1;
   get_logins_test "U3 has logged in twice" 
     (Client.incr_logins u3; Client.incr_logins u3; u3) 2;
+
+  (*Testing to and from json *)
+  get_id_test "Json u1 id is 1" u1_fromj "1";
+  get_name_test "Json u1 name is user 1" u1_fromj "user 1";
+  get_login_test "Json u1 login is user 1*pass1" u1_fromj ("user 1", "pass1");
 ]
 
 let suite = 

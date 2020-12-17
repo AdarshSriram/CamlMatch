@@ -48,21 +48,25 @@ let store_users st =
 let store_admins st = 
   st.admin_list |> to_file "Admins.json"; st
 
-let add_user st uid user =
+let add_user st store uid user =
   let admins = st.admin_list in 
   match st.user_list with 
   | `Assoc x -> begin 
       let users = `Assoc ((uid, user) :: x) in 
-      store_users {user_list = users; admin_list = admins}
+      let new_st = {user_list = users; admin_list = admins} in 
+      if store then store_users new_st
+      else new_st
     end 
   | _ -> failwith "json error"
 
-let add_admin st aid admin =
+let add_admin st store aid admin =
   let users = st.user_list in 
   match st.admin_list with 
   | `Assoc x -> begin 
       let admins = `Assoc ((aid, admin) :: x) in 
-      store_admins {user_list = users; admin_list = admins}
+      let new_st = {user_list = users; admin_list = admins} in 
+      if store then store_admins new_st 
+      else new_st
     end 
   | _ -> failwith "json error"
 
@@ -349,23 +353,3 @@ let draw_graph st =
 
 let connected_components st = 
   (make_graph st |> snd) 
-
-
-(* FOR TESTING ONLY - REMOVE DUPLICATE CODE WITH HELPER FUNCTION *)
-let test_add_user st uid user =
-  let admins = st.admin_list in 
-  match st.user_list with 
-  | `Assoc x -> begin 
-      let users = `Assoc ((uid, user) :: x) in 
-      {user_list = users; admin_list = admins}
-    end 
-  | _ -> failwith "json error"
-
-let test_add_admin st aid admin =
-  let users = st.user_list in 
-  match st.admin_list with 
-  | `Assoc x -> begin 
-      let admins = `Assoc ((aid, admin) :: x) in 
-      {user_list = users; admin_list = admins}
-    end 
-  | _ -> failwith "json error"

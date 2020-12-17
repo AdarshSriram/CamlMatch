@@ -87,22 +87,6 @@ let check_ans s q ans =
   if List.mem ans aid_list then ans
   else failwith "Invalid entry"
 
-(* let  rec same_ans b y1 y2 = 
-   match (y1, y2) with
-   | ([],[]) -> b
-   | (h :: t, a :: b) -> same_ans (h = a) t b
-   | ([],_) | (_,[]) -> false
-
-   let same_q q1 q2 =
-   if q1.question = q2.question && same_ans true q1.answers q2.answers
-   then 0 
-   else -1  (-1 is returned to preserve list order) *)
-
-(* did not implement because not necessary right now. 
-   add_question will be necessary when admins can create new surveys *)
-let add_question lst q =
-  failwith "Unimplemented"
-
 let type_of_question s q = 
   let q_list = question_list s in 
   let quest = get_q q q_list in 
@@ -162,10 +146,11 @@ let find_above_mean lst =
   List.filter (fun (_, score) -> score >= mean) lst  
 
 let compile_matches user state survey = 
+  let q_list = question_list survey in 
   let users = State.get_users state in 
   let other_users = List.filter (fun x -> x <> Client.get_uid user) users in
   let user_prefs = Client.get_preferences user in
-  let all_sim_scores = compile_helper state user_prefs [] other_users survey in
+  let all_sim_scores = compile_helper state user_prefs [] other_users q_list in
   let match_list = find_above_mean all_sim_scores in  
   List.sort comp_scores match_list
 
@@ -251,7 +236,7 @@ let display_histogram st qid survey =
   print_newline ();
   print_ansi rev_hist user_len
 
-let question_histogram qid st admin survey = 
+let question_histogram qid st survey = 
   display_histogram st qid survey
 
 (* For Testing ONLY : *)

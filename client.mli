@@ -19,7 +19,7 @@ exception InvalidMatch
 
 (** [make_user n p id] creates a user with an user id [id], a name [n], 
     an ecrypted password [p], no preferences, no current chats, and no matches 
-    Requires: [id] must be unique/unused *)
+    Requires: [id] must be unique/unused, [n] must not have any spaces*)
 val make_user : string -> string -> uid -> t 
 
 (** [get_uid user] returns the user id of the [user] *)

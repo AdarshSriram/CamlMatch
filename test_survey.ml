@@ -85,6 +85,15 @@ let check_ans_test
   name >:: (fun _ -> 
       assert_equal (expected_output) (Survey.check_ans s id aid))
 
+let check_ans_exn_test 
+    (name : string) 
+    (s : Survey.t) 
+    (qid : Survey.qid) 
+    (aid : Survey.aid) = 
+  name >:: (fun _ -> 
+      assert_raises (Failure "Invalid entry") 
+        (fun () -> Survey.check_ans s qid aid))
+
 let type_of_question_test 
     (name : string) 
     (s: Survey.t) 
@@ -113,9 +122,18 @@ let compile_matches_test
     (expected_output : (Client.uid*float) list) : test = 
   name >:: (fun _ -> 
       assert_equal expected_output 
-        (Survey.compile_matches c st (Survey.question_list s))
+        (Survey.compile_matches c st s)
         ~printer: (pp_list (fun x -> x) string_of_float)
         ~cmp: list_close_enough)
+
+let quest_hist_exn_test 
+    (name : string) 
+    (qid : Survey.qid) 
+    (st : State.state) 
+    (s : Survey.t)  = 
+  name >:: (fun _ -> 
+      assert_raises (Failure "Invalid question id") 
+        (fun () -> Survey.question_histogram qid st s))
 
 let hist_values_test 
     (name : string) 
@@ -142,6 +160,9 @@ let survey_tests = [
 
   check_ans_test "answer 0 is valid for question 1" survey1 "q1" "0" "0";
   check_ans_test "answer 3 is valid for question 2" survey1 "q2" "3" "3";
+
+  check_ans_exn_test "answer 4 is invalid for question1" survey1 "q1" "4";
+  check_ans_exn_test "answer (-1) is invalid for question1" survey1 "q1" "-1";
 
   type_of_question_test "question 1 has an Rng type" survey1 "q1" 
     Survey.q1_type;
@@ -173,6 +194,12 @@ let survey_tests = [
     survey1 [2;2];
   hist_values_test "q4 with pref_state" pref_state "q4" user_uids 
     survey1 [1;1;1;1];
+
+  (*testing question_histogram and answer_list failure *)
+  quest_hist_exn_test "question histogram with qid 7 fails" "q7" pref_state 
+    survey1;
+  quest_hist_exn_test "question histogram with qid 0 fails" "q0" pref_state 
+    survey1;
 ]
 
 let suite = 

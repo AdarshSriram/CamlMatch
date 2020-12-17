@@ -68,7 +68,7 @@ let rec admin_room admin st =
     match Command.parse_admin admin comm st with 
     | Hist q -> begin
         let s = Yojson.Basic.from_file current_survey |> Survey.from_json in
-        Survey.question_histogram q st admin s;
+        Survey.question_histogram q st s;
         admin_room admin st
       end
     | Graph -> State.draw_graph st; admin_room admin st 
@@ -130,7 +130,7 @@ let no_matches user st =
 
 (** Calculates the matches for the user *)
 let calc_matches user st surv = 
-  let matches = Survey.compile_matches user st (Survey.question_list surv) in 
+  let matches = Survey.compile_matches user st surv in 
   Client.update_matches user matches;
   let updated_state = State.replace_user st user in 
   let matched_state = State.store_users updated_state in 
@@ -155,7 +155,7 @@ let rec user_sign_up st survey =
           (State.get_users st |> List.length |> string_of_int) in 
       fill_prefs user (Survey.question_list survey) 
         (Client.get_preferences user) survey;
-      let new_user_state = State.add_user st (Client.get_uid user) 
+      let new_user_state = State.add_user st true (Client.get_uid user) 
           (Client.to_json user) 
       in 
       print_endline "Please wait while we find your matches.";
@@ -178,7 +178,7 @@ let rec admin_sign_up st =
       let pwd = get_pwd () in 
       let aid = (State.get_admins st |> List.length |> string_of_int) in
       let admin = Admin.make_admin aid name pwd in 
-      let new_state = State.add_admin st aid (Admin.to_json admin) in 
+      let new_state = State.add_admin st true aid (Admin.to_json admin) in 
       admin_room admin new_state 
   with
   | State.UsernameTaken -> 
