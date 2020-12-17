@@ -14,6 +14,7 @@ type acommand =
   | AReset of string
   | Quit
   | AHelp of string
+  | AView of string
 
 exception Malformed
 exception NoUserFound
@@ -32,6 +33,7 @@ let acommand_list =
 \t[graph] creates a connection graph visualizing the network of matches
 \t[dist u1 u2] returns how many users [u1] and [u2] are from each other in terms
 \t\tof matches
+\t[view uid] displays data about user with ID [uid]
 \t[reset password] allows you to reset your password
 \t[quit] exits you out of the system"
 
@@ -93,6 +95,7 @@ let valid_dist st admin command =
   match command with 
   | u1::u2::[] -> Dist (u1, u2)
   | _ -> raise Malformed
+
 let valid_areset st rest user = 
   match rest with 
   | h :: [] -> begin 
@@ -102,14 +105,23 @@ let valid_areset st rest user =
     end 
   | [] | _ -> raise Malformed
 
+let valid_aview st rest admin = 
+  match rest with 
+  | h :: [] -> begin  
+      if List.mem h (State.get_users st) then AView h
+      else raise Malformed
+    end
+  | _ -> raise Malformed
+
 let acommand verb rest st admin = 
   let len = List.length rest in 
-  if verb = "hist" && len > 0 then valid_hist st rest admin else
-  if verb = "graph" && len = 0 then Graph else
-  if verb = "dist" && len > 0 then valid_dist st admin rest else
-  if verb = "reset" && len > 0 then valid_areset st rest admin else  
-  if verb = "quit" && len = 0 then Quit else 
-  if verb = "help" && len = 0 then AHelp acommand_list
+  if verb = "hist" && len > 0 then valid_hist st rest admin 
+  else if verb = "graph" && len = 0 then Graph 
+  else if verb = "dist" && len > 0 then valid_dist st admin rest 
+  else if verb = "reset" && len > 0 then valid_areset st rest admin   
+  else if verb = "quit" && len = 0 then Quit  
+  else if verb = "help" && len = 0 then AHelp acommand_list 
+  else if verb = "view" && len > 0 then valid_aview st rest admin
   else raise Malformed
 
 let parse_admin admin str st = 

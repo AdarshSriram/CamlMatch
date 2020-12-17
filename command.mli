@@ -24,6 +24,7 @@ type acommand =
   | AReset of string
   | Quit
   | AHelp of string
+  | AView of string
 
 (** Raised when a malformed command is encountered. *)
 exception Malformed

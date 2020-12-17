@@ -229,10 +229,17 @@ let print_user_stats st uid =
   let user = get_user_by_id st uid in 
   let answer_survey = Client.get_preferences user <> [] in 
   let num_matches = List.length (Client.get_matches user) in 
+  print_newline ();
+  let user_str = "Viewing: " ^ uid ^ " " in
+  ANSITerminal.(print_string [cyan; Bold; Underlined] user_str);
+  print_newline (); 
+  print_newline ();
   print_endline ("Name: " ^ Client.get_name user);
   print_endline ("No. of Logins: " ^ string_of_int (Client.get_logins user));
   print_endline ("Survey Questions Answered?: " ^ string_of_bool answer_survey);
-  print_string ("Number of Matches: " ^ string_of_int num_matches)
+  print_string ("Number of Matches: " ^ string_of_int num_matches);
+  print_newline ();
+  print_newline ();
 
 module Flt = struct 
   type t = float

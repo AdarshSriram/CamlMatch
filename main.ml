@@ -79,6 +79,7 @@ let rec admin_room admin st =
           else 
             let friend = if dist = 1 then " friend " else " friends " in
             u1 ^ " is " ^ (string_of_int dist) ^  friend ^ "away from "^ u2 ^"." in 
+        print_newline ();
         print_endline msg; admin_room admin st
       end 
     | AReset _ -> begin 
@@ -90,6 +91,7 @@ let rec admin_room admin st =
         print_endline txt;
         admin_room admin st
       end
+    | AView user -> State.print_user_stats st user; admin_room admin st
   with 
   | _ -> begin 
       print_endline "Command not recognized.";
