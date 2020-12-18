@@ -44,10 +44,7 @@ let fold_message other =
 let valid_send st command user =
   match command with 
   | h::[] -> raise Malformed
-  | h::t -> begin 
-      if (State.can_send st (h) user) then Send (h, fold_message t) 
-      else raise Malformed
-    end 
+  | h::t ->   Send (h, fold_message t) 
   | [] -> raise Malformed
 
 (** [valid_view st rest user] checks if [rest] is valid and calls the 

@@ -210,15 +210,6 @@ let print_matches st user =
       end in 
   print_helper (Client.get_matches user)
 
-let can_send st receiver user = 
-  let creds = get_user_logins st in 
-  let rec check_creds credList = 
-    match credList with
-    | [] -> false 
-    | (_, (a, _)) ::t ->  if a = receiver && a <> Client.get_name user
-      then true else check_creds t in
-  check_creds creds
-
 let change_user_pword st user pword = 
   let new_user = Client.update_pword user pword; user in 
   let new_st = replace_user st new_user in 
@@ -353,3 +344,4 @@ let draw_graph st =
 
 let connected_components st = 
   (make_graph st |> snd) 
+

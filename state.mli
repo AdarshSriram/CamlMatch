@@ -52,16 +52,9 @@ val get_admin_by_id : state -> Admin.aid -> Admin.t
     has the user name [name]. Returns false otherwise *)
 val user_can_sign_up : state -> string -> bool
 
-(** [can_send state uname user] is a boolean, indicating whether user [user] can
-    successfully send a message to user with username [uname] *)
-val can_send : state -> string -> Client.t -> bool
 (** [admin_can_sign_up st name] returns true if no other admin in the state [st] 
     has the name [name]. Returns false otherwise *)
 val admin_can_sign_up : state -> string -> bool
-
-(** [can_send state uname user] is a boolean, indicating whether user [user] can
-    successfully send a message to user with username [uname] *)
-val can_send : state -> string -> Client.t -> bool
 
 (** [validate_user st name pword] returns the user if the [name, pword] 
     combination is valid in state [st]. 
@@ -88,7 +81,6 @@ val send_notification : state -> Client.t -> string -> string -> state
 val add_user_to_matches : state -> Client.t -> (Client.uid * float) list 
   -> state
 
-
 (** [change_user_pword st user pword] updates the [user's] password to the 
     encrypted form for [pword] and returns the new state with the updated 
     user *)
@@ -108,12 +100,7 @@ val read_notifs : state -> Client.t -> unit
     the sytem's state [state] *)
 val print_matches : state -> Client.t -> unit  
 
-(** [get_user_recs st] returns the users in state [st] *)
-val get_user_recs : state -> Client.t list 
-
 val draw_graph : state -> unit
-
-val connected_components : state -> (string list) list
 
 (** [shortest_path state u1 u2] is the number of friends apart users with 
     usenames u1 and u2 are. Returns -1 if u1 and u2 are not part of the same 
@@ -124,3 +111,6 @@ val shortest_path : state -> string -> string -> int
     Information includes username, number of times logged in, preferences, and 
     number of matches *)
 val print_user_stats : state -> Client.uid -> unit
+
+(** [get_user_recs st] returns the list of users that are in state [st] *)
+val get_user_recs : state -> Client.t list

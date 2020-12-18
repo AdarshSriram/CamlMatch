@@ -93,8 +93,7 @@ let command_tests = [
 
   (* testing errors *)
   parse_user_error "malformed send" u1 pref_state "send user2" Malformed;
-  parse_user_error "nouserfound send" u1 pref_state "send xyz hello"
-    Malformed;
+
   parse_user_error "malformed view" u1 pref_state "view sdjk" Malformed;
   parse_user_error "malformed reset" u1 pref_state "reset" Malformed;
   parse_user_error "malformed quit" u1 pref_state "qit" Malformed;

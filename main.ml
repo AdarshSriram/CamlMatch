@@ -230,8 +230,6 @@ let user_logged_in user st =
   Client.incr_logins user;
   let logged_st = State.replace_user st user in 
   check_notifs user (State.store_users logged_st)
-(* if send_notif st user = st then waiting_room user st 
-   else print_endline "\nMessage sent."; waiting_room user st *)
 
 let admin_logged_in adm st = 
   admin_room adm st

@@ -104,8 +104,13 @@ let admin_can_sign_up_test
   name >:: (fun _ -> 
       assert_equal res (admin_can_sign_up st aname))
 
+
 let test_state = State.get_state "test_jsons/DummyUsers.json" 
     "test_jsons/DummyAdmins.json"
+
+let matched_state = State.get_state "test_jsons/MatchedUsers.json" 
+    "test_jsons/DummyAdmins.json"
+
 let empty_state = State.init_state ()
 
 let u5 = Client.to_json (Client.make_user "user 5" "123456" "5")
@@ -154,6 +159,7 @@ let state_tests = [
     [];
   add_admin_test "Add admin 3" test_state "3" a3 add_admin_state;
   get_a_by_id_test "Get admin 0" test_state "0" a0;
+
   "Validate admin0 login info" >:: (fun _ -> 
       assert_equal (validate_admin test_state "admin 0" "257709571") 
         (get_admin_by_id test_state "0"));
@@ -165,6 +171,7 @@ let state_tests = [
 
   admin_can_sign_up_test "admin 4 can sign up" test_state "admin 4" true;
   admin_can_sign_up_test "admin 1 cannot sign up" test_state "admin 0" false;
+
 ]
 
 let suite = 

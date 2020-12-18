@@ -114,4 +114,33 @@
     output and to test that the correct exceptions were raised. Because we used
     black box testing, we tested each branch of the if/else statements for a 
     comprehensive test suite based on the specifications.
+
+    State Module: 
+    Development Method: We used test driven development and developed tests 
+    using black box, glass box, and manual testing. We created test cases based 
+    on the specifications of each functionsand possible edge cases to ensure 
+    most pattern matches and if branches were tested.
+
+    OUnit Testing: get_users, add_users, get_user_by_id, validate_user, 
+    replace_user, user_can_sign_up, get_user_recs (in test_survey.ml), 
+    get_admins, add_admins, get_admin_by_id, validate_admin, admin_can_sign_up.
+
+    State.get_state and init_state were implicitly tested while testing the 
+    above functions
+
+    Manual: draw_graph and shortest_path were tested manually. The graphs and 
+    shortest paths produced were black-box tested for several edge cases, 
+    eg. empty graph, one graph, user(s) not in graph, and shortest_path to self.
+    The functions print_user_stats, read_notifs, and print_matches were tested
+    manually because they each return unit and print strings to the console.
+    The functions store_users, store_admins, and consequently, 
+    send_notifications; change_user_password; and change_admin_password were  
+    tested manually because they manipulate the Users.json and Admins.json file,
+    and therefore cannot be tested by the OUnit Suite. 
+
+    Correctness: The testing suite demonstrates correctness of the State module
+    because all exposed functions were tested based on their specifications, or
+    how what they are expected to output given that the precondition is not 
+    violated.  
+
 *)
