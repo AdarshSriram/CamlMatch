@@ -1,6 +1,7 @@
 (**
-   Done: Admin, Client, Survey, Main, Command
-   TODO: Statek box testing. Since the functions written were not complex and
+   Admin Module:
+    Development Method: We used test driven development and developed tests
+    using black box testing. Since the functions written were not complex and
     did not have any branches (i.e.: if statements or pattern matching), we 
     created test cases based on the specifications of each functions and
     possible edge cases.
@@ -133,5 +134,4 @@
     how what they are expected to output given that the precondition is not 
     violated.  
 
-*)
 *)

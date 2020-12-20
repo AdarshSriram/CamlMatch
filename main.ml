@@ -54,7 +54,7 @@ let rec admin_room admin st =
   try
     match Command.parse_admin admin comm st with 
     | Hist q -> exec_hist st admin q
-    | Graph -> State.draw_graph st; admin_room admin st 
+    | Graph -> exec_graph st admin 
     | Dist (u1, u2) -> exec_dist st admin u1 u2
     | AReset _ -> exec_admin_reset st admin
     | Quit -> exit 0
@@ -63,18 +63,25 @@ let rec admin_room admin st =
   with 
   | _ -> print_endline "Command not recognized."; admin_room admin st
 
-and exec_hist st admin q= 
+and exec_hist st admin q = 
   let s = Survey.from_json (Yojson.Basic.from_file current_survey) in
   Survey.question_histogram q st s;
   admin_room admin st
+
+and exec_graph st admin = 
+  State.draw_graph st; 
+  print_endline "UserGraph.pdf created"; 
+  admin_room admin st 
 
 and exec_dist st admin u1 u2 = 
   let dist = State.shortest_path st u1 u2 in 
   let friend = if dist = 2 then " friend " else " friends " in
   let msg = 
     if dist = -1 then "Invalid usernames"
-    else u1 ^ " is " ^ (string_of_int (dist - 1)) ^  friend ^ "away from " 
-         ^ u2 ^ "." in 
+    else begin
+      u1 ^ " is " ^ (string_of_int (dist - 1)) ^  friend ^ "away from " 
+      ^ u2 ^ "." 
+    end in 
   print_newline ();
   print_endline msg; admin_room admin st
 

@@ -34,14 +34,10 @@ let list_close_enough l1 l2 =
   in 
   lens && helper true l1 l2
 
-
 let survey1 = Survey.from_json (Yojson.Basic.from_file "survey1.json")
 
-let empty = {|{"questions": [
-   ]
-   }|}
-
-let empty_survey = Survey.from_json (Yojson.Basic.from_string empty)
+let empty_survey = Survey.from_json 
+    (Yojson.Basic.from_file "test_jsons/EmptySurvey.json")
 
 let empty_state = State.init_state ()
 
@@ -59,7 +55,6 @@ let u1_prefs = get_user_by_id "1" user_recs
 let u2_prefs = get_user_by_id "2" user_recs
 let u3_prefs = get_user_by_id "3" user_recs
 let u4_prefs = get_user_by_id "4" user_recs
-
 
 let question_list_test 
     (name : string) 
@@ -147,16 +142,17 @@ let hist_values_test
 
 let survey_tests = [
   question_list_test "Empty survey returns empty list" empty_survey [];
-  question_list_test "Survey 1 returns q list" survey1 Survey.q_list;
+  question_list_test "Survey 1 returns q list" survey1 (Survey.get_q_list ());
 
   answer_list_test "Survey 1 qid q3 returns Appel and RPCC" survey1 "q3"
-    Survey.q3_ans;
+    (Survey.get_q3_ans ());
 
   "find q test; qid of q4 returns question 4" >:: (fun _ -> 
-      assert_equal Survey.q4_rec (Survey.find_q Survey.q_list "q4"));
+      assert_equal (Survey.get_q4_rec ()) (Survey.find_q (Survey.get_q_list()) 
+                                             "q4"));
 
   "get_qid test; question 4 has qid of q4" >:: (fun _ -> 
-      assert_equal "q4" (Survey.get_qid Survey.q4_rec));
+      assert_equal "q4" (Survey.get_qid (Survey.get_q4_rec ())));
 
   check_ans_test "answer 0 is valid for question 1" survey1 "q1" "0" "0";
   check_ans_test "answer 3 is valid for question 2" survey1 "q2" "3" "3";
@@ -165,9 +161,9 @@ let survey_tests = [
   check_ans_exn_test "answer (-1) is invalid for question1" survey1 "q1" "-1";
 
   type_of_question_test "question 1 has an Rng type" survey1 "q1" 
-    Survey.q1_type;
+    (Survey.get_q1_type ());
   type_of_question_test "question 2 has an Opt type" survey1 "q2" 
-    Survey.q2_type;
+    (Survey.get_q2_type ());
 
   match_score_test "u1 u2 should be highest match" survey1
     (Client.get_preferences u1_prefs) (Client.get_preferences u2_prefs) 
