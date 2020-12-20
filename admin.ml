@@ -8,23 +8,21 @@ type t = {
   mutable pword : string;
 }
 
-let make_admin id n p =
-  {
-    a_id = id;
-    name = n;
-    pword = p;
-  }
+let make_admin id nm pw = {
+  a_id = id;
+  name = nm;
+  pword = pw;
+}
 
-let get_aid ad = ad.a_id
+let get_aid admin = admin.a_id
 
-let get_name ad = ad.name
+let get_name admin = admin.name
 
-let get_login ad = (ad.name, ad.pword)
+let get_login admin = (admin.name, admin.pword)
 
-let encrypt p = p |> Hashtbl.hash |> string_of_int
+let encrypt pw = pw |> Hashtbl.hash |> string_of_int
 
-let update_pword ad pword = 
-  ad.pword <- pword
+let update_pword admin pw = admin.pword <- pw
 
 let to_json admin = 
   `Assoc [

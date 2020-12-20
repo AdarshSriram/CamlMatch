@@ -143,7 +143,8 @@ let find_above_mean lst =
   let add_score acc (_, score) = acc +. score in 
   let mean = (List.fold_left add_score 0. lst) /. 
              float_of_int (List.length lst) in 
-  List.filter (fun (_, score) -> score >= mean) lst  
+  if mean = 0. then [] 
+  else List.filter (fun (_, score) -> score >= mean) lst  
 
 let compile_matches user state survey = 
   let q_list = question_list survey in 

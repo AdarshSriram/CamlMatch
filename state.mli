@@ -91,11 +91,6 @@ val change_user_pword : state -> Client.t -> string -> state
     admin *)
 val change_admin_pword : state -> Admin.t -> string -> state 
 
-
-(** [read_notifs st user] pretty-prints the [user]'s notfications to the 
-    console *)
-val read_notifs : state -> Client.t -> unit
-
 (** [print_matches st user] pretty-prints [user's] matches to the console in 
     the sytem's state [state] *)
 val print_matches : state -> Client.t -> unit  

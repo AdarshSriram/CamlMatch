@@ -119,7 +119,6 @@ let command_tests = [
     Malformed;
   parse_admin_error "malformed quit" a1 pref_state "quit xx" Malformed;
   parse_admin_error "malformed help" a1 pref_state "halp" Malformed;
-  parse_admin_error "maleformed view" a1 pref_state "view usr1" Malformed;
 ]
 
 let suite = 

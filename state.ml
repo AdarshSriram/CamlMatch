@@ -173,17 +173,6 @@ let send_notification st user (m_name : string) msg =
     store_users new_state
   end 
 
-let read_notifs st user = 
-  let rec print_to_console notifs = 
-    match notifs with
-    | [] -> Client.clear_notifs user; print_newline ()
-    | (x, y) :: t -> begin 
-        let match_name = get_user_by_id st x |> Client.get_name in 
-        print_endline (match_name ^ ":" ^"\t"  ^ y);
-        print_to_console t
-      end in
-  print_to_console (Client.get_notifs user)
-
 let add_user_to_matches st user mlist = 
   let rec aux st = function 
     | [] -> st 
