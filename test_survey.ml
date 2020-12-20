@@ -183,9 +183,9 @@ let survey_tests = [
 
   (* testing histogram *)
   hist_values_test "q1 with pref_state" pref_state "q1" user_uids 
-    survey1 [1;1;0;2];
+    survey1 [2; 0; 1; 1;];
   hist_values_test "q2 with pref_state" pref_state "q2" user_uids 
-    survey1 [1;3;0;0];
+    survey1 [0; 0; 3; 1];
   hist_values_test "q3 with pref_state" pref_state "q3" user_uids 
     survey1 [2;2];
   hist_values_test "q4 with pref_state" pref_state "q4" user_uids 

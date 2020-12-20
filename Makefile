@@ -59,4 +59,4 @@ docs-private: build
 		-inv-merge-ml-mli -m A $(MLIS) $(MLS)
 
 zip: 
-	zip final_project.zip *.ml* *.json clear_graph.sh make_graph.sh _tags INSTALL.txt Makefile
+	zip final_project.zip *.ml* *.json test_jsons/* clear_graph.sh make_graph.sh _tags INSTALL.txt Makefile

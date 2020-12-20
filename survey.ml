@@ -179,7 +179,7 @@ let count_ans qid prefs acc =
   | Not_found -> failwith "Question not found."
 
 let rec get_prefs st qid acc survey = function 
-  | [] -> acc
+  | [] -> List.rev acc
   | h :: t -> begin 
       let user_pref = h |> State.get_user_by_id st |> Client.get_preferences in
       let new_acc = count_ans qid user_pref acc in 
